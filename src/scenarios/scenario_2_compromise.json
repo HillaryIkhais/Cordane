@@ -1,0 +1,17 @@
+{
+  "id": "scenario-2",
+  "name": "CloudAnalytics Enterprise",
+  "vendor": "CloudData Corp",
+  "cost": 60000,
+  "budgetLimit": 50000,
+  "dataRequired": ["customer_transaction_data", "anonymized_pii"],
+  "dataOwnership": "client_owns_raw_vendor_owns_aggregated",
+  "securityScore": 85,
+  "integrationTimeDays": 20,
+  "departmentNeed": "Critical",
+  "contractTerms": {
+    "autoRenew": true,
+    "liabilityCap": "5x Annual Fee",
+    "terminationNoticeDays": 60
+  }
+}
