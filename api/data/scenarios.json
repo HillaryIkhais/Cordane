@@ -1,0 +1,23 @@
+[
+  {
+    "id": "scenario_1_happy_path",
+    "title": "Basic Software License (Happy Path)",
+    "status": "Ready",
+    "date": "Jun 08, 2026",
+    "contract": { "terms": "Standard SaaS" }
+  },
+  {
+    "id": "scenario_2_compromise",
+    "title": "Cloud Hosting Agreement (Compromise)",
+    "status": "Ready",
+    "date": "Jun 09, 2026",
+    "contract": { "terms": "Standard Cloud" }
+  },
+  {
+    "id": "scenario_3_deadlock",
+    "title": "Vendor Liability Contract (Deadlock)",
+    "status": "Ready",
+    "date": "Jun 10, 2026",
+    "contract": { "terms": "Uncapped Liability" }
+  }
+]

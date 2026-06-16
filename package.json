@@ -1,6 +1,6 @@
 {
-  "name": "quorum",
-  "version": "0.1.0",
+  "name": "cordane-enterprise-engine",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev -p 3001",

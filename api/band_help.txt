@@ -1,0 +1,3011 @@
+Help on package band:
+
+NAME
+    band - Band SDK - Connect AI agents to the Band platform.
+
+DESCRIPTION
+    Platform Layer:
+        BandLink: WebSocket + REST transport
+        PlatformEvent: Typed events from the platform
+
+    Runtime Layer:
+        AgentRuntime: Convenience wrapper (RoomPresence + Execution)
+        RoomPresence: Cross-room lifecycle management
+        ExecutionContext: Per-room context accumulation
+        AgentTools: Platform tools bound to a room (send_message, add_participant, etc.)
+        PlatformMessage: Message data structure
+
+    Configuration:
+        AgentConfig: Agent-level configuration
+        SessionConfig: Per-session configuration
+
+    Example (SDK-heavy pattern):
+        from band import BandLink, AgentRuntime, ExecutionContext, AgentTools
+        from band.platform import PlatformEvent
+
+        async def handle_event(ctx: ExecutionContext, event: PlatformEvent):
+            tools = AgentTools.from_context(ctx)
+            # Your LLM logic here
+            await tools.send_message("Hello!", mentions=["@john"])
+
+        link = BandLink(agent_id="...", api_key="...", ws_url="...", rest_url="...")
+        runtime = AgentRuntime(link, agent_id="...", on_execute=handle_event)
+        await runtime.run()
+
+    Example (Framework-light pattern):
+        from band import BandLink, RoomPresence
+
+        link = BandLink(agent_id="...", api_key="...", ws_url="...", rest_url="...")
+        presence = RoomPresence(link)
+        presence.on_room_joined = my_join_handler
+        presence.on_room_event = my_event_handler
+        await presence.start()
+        await link.run_forever()
+
+PACKAGE CONTENTS
+    adapters (package)
+    agent
+    cli (package)
+    client (package)
+    config (package)
+    converters (package)
+    core (package)
+    docker (package)
+    integrations (package)
+    platform (package)
+    preprocessing (package)
+    prompts (package)
+    runtime (package)
+    testing (package)
+
+CLASSES
+    band.core.protocols.AgentToolsProtocol(typing.Protocol)
+        band.runtime.tools.AgentTools
+    builtins.Exception(builtins.BaseException)
+        band.core.exceptions.BandError
+            band.core.exceptions.BandConfigError
+            band.core.exceptions.BandConnectionError
+            band.core.exceptions.BandToolError
+    builtins.object
+        band.agent.Agent
+        band.core.types.AdapterFeatures
+        band.platform.link.BandLink
+        band.runtime.execution.ExecutionContext
+        band.runtime.participant_tracker.ParticipantTracker
+        band.runtime.presence.RoomPresence
+        band.runtime.retry_tracker.MessageRetryTracker
+        band.runtime.runtime.AgentRuntime
+        band.runtime.shutdown.GracefulShutdown
+        band.runtime.types.AgentConfig
+        band.runtime.types.ConversationContext
+        band.runtime.types.PlatformMessage
+        band.runtime.types.SessionConfig
+    builtins.str(builtins.object)
+        band.core.types.Capability(builtins.str, enum.Enum)
+        band.core.types.Emit(builtins.str, enum.Enum)
+    enum.Enum(builtins.object)
+        band.core.types.Capability(builtins.str, enum.Enum)
+        band.core.types.Emit(builtins.str, enum.Enum)
+    typing.Protocol(typing.Generic)
+        band.runtime.execution.Execution
+
+    class AdapterFeatures(builtins.object)
+     |  AdapterFeatures(*, capabilities: 'Iterable[Capability]' = (), emit: 'Iterable[Emit]' = (), include_tools: 'Iterable[str] | None' = None, exclude_tools: 'Iterable[str] | None' = None, include_categories: 'Iterable[str] | None' = None) -> 'None'
+     |
+     |  Shared adapter feature settings. Framework-agnostic knobs only.
+     |
+     |  Custom tools are NOT included -- they are adapter-local because each
+     |  framework has its own tool type.
+     |
+     |  Accepts any iterable inputs for convenience; stores frozen types
+     |  internally.
+     |
+     |  Methods defined here:
+     |
+     |  __delattr__(self, name)
+     |      Implement delattr(self, name).
+     |
+     |  __eq__(self, other)
+     |      Return self==value.
+     |
+     |  __hash__(self)
+     |      Return hash(self).
+     |
+     |  __init__(self, *, capabilities: 'Iterable[Capability]' = (), emit: 'Iterable[Emit]' = (), include_tools: 'Iterable[str] | None' = None, exclude_tools: 'Iterable[str] | None' = None, include_categories: 'Iterable[str] | None' = None) -> 'None'
+     |      Initialize self.  See help(type(self)) for accurate signature.
+     |
+     |  __repr__(self)
+     |      Return repr(self).
+     |
+     |  __setattr__(self, name, value)
+     |      Implement setattr(self, name, value).
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |
+     |  __dict__
+     |      dictionary for instance variables
+     |
+     |  __weakref__
+     |      list of weak references to the object
+     |
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes defined here:
+     |
+     |  __annotations__ = {'capabilities': 'frozenset[Capability]', 'emit': 'f...
+     |
+     |  __dataclass_fields__ = {'capabilities': Field(name='capabilities',type...
+     |
+     |  __dataclass_params__ = _DataclassParams(init=True,repr=True,eq=True,or...
+     |
+     |  __match_args__ = ('capabilities', 'emit', 'include_tools', 'exclude_to...
+
+    class Agent(builtins.object)
+     |  Agent(runtime: 'PlatformRuntime', adapter: 'FrameworkAdapter | SimpleAdapter', preprocessor: 'Preprocessor | None' = None)
+     |
+     |  Composes platform runtime, preprocessor, and adapter.
+     |
+     |  Two ways to create:
+     |
+     |  1. Full composition (power users):
+     |      agent = Agent(
+     |          runtime=PlatformRuntime(...),
+     |          preprocessor=CustomPreprocessor(),
+     |          adapter=MyAdapter(),
+     |      )
+     |
+     |  2. Simple factory (most users):
+     |      agent = Agent.create(
+     |          adapter=MyAdapter(),
+     |          agent_id="...",
+     |          api_key="...",
+     |      )
+     |
+     |  Methods defined here:
+     |
+     |  async __aenter__(self) -> "'Agent'"
+     |      Enter async context - start the agent.
+     |
+     |      Example:
+     |          async with Agent.create(...) as agent:
+     |              await agent.run_forever()  # or just wait
+     |
+     |  async __aexit__(self, exc_type: 'type[BaseException] | None', exc_val: 'BaseException | None', exc_tb: 'TracebackType | None') -> 'None'
+     |      Exit async context - stop the agent gracefully.
+     |
+     |      Uses the shutdown_timeout configured in run(), or DEFAULT_SHUTDOWN_TIMEOUT
+     |      if run() was never called. If run() was called with shutdown_timeout=None,
+     |      stops immediately without waiting.
+     |
+     |  __init__(self, runtime: 'PlatformRuntime', adapter: 'FrameworkAdapter | SimpleAdapter', preprocessor: 'Preprocessor | None' = None)
+     |      Initialize self.  See help(type(self)) for accurate signature.
+     |
+     |  async run(self, shutdown_timeout: 'float | None' = 30.0) -> 'None'
+     |      Run until interrupted.
+     |
+     |      Args:
+     |          shutdown_timeout: Seconds to wait for graceful shutdown on interrupt.
+     |                            Set to None for immediate cancellation.
+     |                            Default is 30 seconds.
+     |
+     |  async run_forever(self) -> 'None'
+     |      Keep the agent running forever.
+     |
+     |      Use this inside an async context manager:
+     |          async with agent:
+     |              await agent.run_forever()
+     |
+     |      Or after manually calling start():
+     |          await agent.start()
+     |          try:
+     |              await agent.run_forever()
+     |          finally:
+     |              await agent.stop()
+     |
+     |  async start(self) -> 'None'
+     |      Start agent.
+     |
+     |  async stop(self, timeout: 'float | None' = None) -> 'bool'
+     |      Stop agent with optional graceful timeout.
+     |
+     |      If timeout is provided, waits up to that many seconds for any ongoing
+     |      message processing to complete before stopping. If timeout is None,
+     |      stops immediately by cancelling any in-progress processing.
+     |
+     |      Args:
+     |          timeout: Optional seconds to wait for graceful shutdown.
+     |                   None means stop immediately.
+     |
+     |      Returns:
+     |          True if stopped gracefully (processing completed or was idle),
+     |          False if had to cancel mid-processing after timeout.
+     |
+     |  ----------------------------------------------------------------------
+     |  Class methods defined here:
+     |
+     |  create(adapter: 'FrameworkAdapter | SimpleAdapter', agent_id: 'str', api_key: 'str', ws_url: 'str' = 'wss://app.band.ai/api/v1/socket/websocket', rest_url: 'str' = 'https://app.band.ai', config: 'AgentConfig | None' = None, session_config: 'SessionConfig | None' = None, contact_config: 'ContactEventConfig | None' = None, on_participant_added: 'ParticipantAddedCallback | None' = None, on_participant_removed: 'ParticipantRemovedCallback | None' = None, preprocessor: 'Preprocessor | None' = None) -> "'Agent'"
+     |      Create agent with default runtime.
+     |
+     |      Convenience factory for most users.
+     |
+     |      Args:
+     |          adapter: Framework adapter (e.g., PydanticAIAdapter)
+     |          agent_id: UUID of the agent
+     |          api_key: API key for authentication
+     |          ws_url: WebSocket URL (default: wss://app.band.ai/api/v1/socket/websocket)
+     |          rest_url: REST API URL (default: https://app.band.ai)
+     |          config: Agent configuration options
+     |          session_config: Session lifecycle configuration
+     |          contact_config: Contact event handling configuration.
+     |                          Controls how contact requests and updates are processed.
+     |                          See ContactEventConfig for strategies (DISABLED, CALLBACK, HUB_ROOM).
+     |          on_participant_added: Optional callback for participant_added events.
+     |          on_participant_removed: Optional callback for participant_removed events.
+     |          preprocessor: Custom event preprocessor (default: DefaultPreprocessor)
+     |
+     |  from_config(name: 'str', *, adapter: 'FrameworkAdapter | SimpleAdapter', config_path: 'str | Path | None' = None, **kwargs: 'Any') -> "'Agent'"
+     |      Create an Agent from YAML config + a constructed adapter.
+     |
+     |      Loads agent_id and api_key from YAML configuration.
+     |      The adapter is constructed by the caller in Python code.
+     |
+     |      Args:
+     |          name: Agent key in the YAML config file.
+     |          adapter: Pre-constructed framework adapter.
+     |          config_path: Path to agent_config.yaml. If None, searches
+     |                       the default locations.
+     |          **kwargs: Additional keyword arguments passed to create().
+     |
+     |      Returns:
+     |          Configured Agent instance.
+     |
+     |  ----------------------------------------------------------------------
+     |  Readonly properties defined here:
+     |
+     |  agent_description
+     |
+     |  agent_name
+     |
+     |  contact_config
+     |      Get the contact event configuration.
+     |
+     |  is_contacts_subscribed
+     |      Check if agent is subscribed to contact events.
+     |
+     |  is_running
+     |      Check if agent is currently running.
+     |
+     |  runtime
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |
+     |  __dict__
+     |      dictionary for instance variables
+     |
+     |  __weakref__
+     |      list of weak references to the object
+
+    class AgentConfig(builtins.object)
+     |  AgentConfig(auto_subscribe_existing_rooms: 'bool' = True) -> None
+     |
+     |  Configuration for agent runtime.
+     |
+     |  Methods defined here:
+     |
+     |  __eq__(self, other)
+     |      Return self==value.
+     |
+     |  __init__(self, auto_subscribe_existing_rooms: 'bool' = True) -> None
+     |      Initialize self.  See help(type(self)) for accurate signature.
+     |
+     |  __repr__(self)
+     |      Return repr(self).
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |
+     |  __dict__
+     |      dictionary for instance variables
+     |
+     |  __weakref__
+     |      list of weak references to the object
+     |
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes defined here:
+     |
+     |  __annotations__ = {'auto_subscribe_existing_rooms': 'bool'}
+     |
+     |  __dataclass_fields__ = {'auto_subscribe_existing_rooms': Field(name='a...
+     |
+     |  __dataclass_params__ = _DataclassParams(init=True,repr=True,eq=True,or...
+     |
+     |  __hash__ = None
+     |
+     |  __match_args__ = ('auto_subscribe_existing_rooms',)
+     |
+     |  auto_subscribe_existing_rooms = True
+
+    class AgentRuntime(builtins.object)
+     |  AgentRuntime(link: "'BandLink'", agent_id: 'str', on_execute: 'ExecutionHandler', execution_factory: 'ExecutionFactory | None' = None, room_filter: 'Callable[[dict], bool] | None' = None, session_config: 'SessionConfig | None' = None, on_session_cleanup: 'Callable[[str], Awaitable[None]] | None' = None, on_participant_added: 'ParticipantAddedCallback | None' = None, on_participant_removed: 'ParticipantRemovedCallback | None' = None)
+     |
+     |  Convenience wrapper: RoomPresence + Execution management.
+     |
+     |  For SDK-heavy users who want managed execution contexts.
+     |  Framework-light users can use RoomPresence directly.
+     |
+     |  Manages:
+     |  - Agent presence across rooms via RoomPresence
+     |  - Per-room execution contexts via ExecutionContext (or custom)
+     |  - Lifecycle coordination (start, stop, run)
+     |
+     |  Example (default execution):
+     |      link = BandLink(agent_id, api_key, ...)
+     |
+     |      async def on_execute(ctx: ExecutionContext, event: PlatformEvent):
+     |          if isinstance(event, MessageEvent):
+     |              tools = AgentTools.from_context(ctx)
+     |              # Process message with LLM...
+     |
+     |      runtime = AgentRuntime(link, agent_id, on_execute=on_execute)
+     |      await runtime.run()
+     |
+     |  Example (custom execution factory):
+     |      def letta_factory(
+     |          room_id: str,
+     |          link: BandLink,
+     |          *,
+     |          hub_room_id: str | None = None,
+     |      ) -> Execution:
+     |          return LettaExecution(room_id, link, hub_room_id=hub_room_id)
+     |
+     |      runtime = AgentRuntime(
+     |          link,
+     |          agent_id,
+     |          on_execute=my_handler,
+     |          execution_factory=letta_factory,
+     |      )
+     |      await runtime.run()
+     |
+     |  Methods defined here:
+     |
+     |  __init__(self, link: "'BandLink'", agent_id: 'str', on_execute: 'ExecutionHandler', execution_factory: 'ExecutionFactory | None' = None, room_filter: 'Callable[[dict], bool] | None' = None, session_config: 'SessionConfig | None' = None, on_session_cleanup: 'Callable[[str], Awaitable[None]] | None' = None, on_participant_added: 'ParticipantAddedCallback | None' = None, on_participant_removed: 'ParticipantRemovedCallback | None' = None)
+     |      Initialize AgentRuntime.
+     |
+     |      Args:
+     |          link: BandLink for WebSocket and REST
+     |          agent_id: Agent ID from Band platform
+     |          on_execute: Callback for handling execution events
+     |          execution_factory: Optional factory for custom Execution implementations
+     |          room_filter: Optional filter to decide which rooms to join
+     |          session_config: Configuration for ExecutionContext
+     |          on_session_cleanup: Optional callback for session cleanup (receives room_id)
+     |          on_participant_added: Optional callback for participant_added events
+     |          on_participant_removed: Optional callback for participant_removed events
+     |
+     |  async run(self) -> 'None'
+     |      Run the agent until stopped or interrupted.
+     |
+     |      Starts the runtime and keeps the WebSocket connection alive.
+     |
+     |  set_hub_room_id(self, hub_room_id: 'str | None') -> 'None'
+     |      Register the hub-room ID so future executions can auto-enable contact tools.
+     |
+     |      Called by PlatformRuntime when ContactEventStrategy.HUB_ROOM is active
+     |      and the hub room has been created. AgentTools constructed for the hub
+     |      room (room_id == hub_room_id) will force-include contact-management
+     |      tool schemas regardless of adapter feature settings.
+     |
+     |  async start(self) -> 'None'
+     |      Start the agent runtime.
+     |
+     |      1. Starts RoomPresence (connects link, subscribes to rooms)
+     |      2. Creates execution contexts for existing rooms
+     |
+     |  async stop(self, timeout: 'float | None' = None) -> 'bool'
+     |      Stop the agent runtime with optional graceful timeout.
+     |
+     |      Args:
+     |          timeout: Optional seconds to wait for current processing to complete
+     |                   in each execution context. None means cancel immediately.
+     |
+     |      Returns:
+     |          True if all executions stopped gracefully, False if any had to be
+     |          cancelled mid-processing.
+     |
+     |      1. Stops all execution contexts (with timeout)
+     |      2. Stops RoomPresence
+     |
+     |  ----------------------------------------------------------------------
+     |  Readonly properties defined here:
+     |
+     |  active_sessions
+     |      Get active execution contexts by room_id.
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |
+     |  __dict__
+     |      dictionary for instance variables
+     |
+     |  __weakref__
+     |      list of weak references to the object
+
+    class AgentTools(band.core.protocols.AgentToolsProtocol)
+     |  AgentTools(room_id: 'str', rest: "'AsyncRestClient'", participants: 'list[dict[str, Any]] | None' = None, *, hub_room_id: 'str | None' = None)
+     |
+     |  Room-bound tools for LLM platform interaction.
+     |
+     |  Uses AsyncRestClient directly for API calls.
+     |  Bound to a specific room_id. Passed to execution handlers.
+     |
+     |  This class provides:
+     |  - Tool methods (send_message, add_participant, etc.)
+     |  - Contact management methods (list_contacts, add_contact, etc.)
+     |  - Schema converters for different LLM frameworks
+     |  - execute_tool_call() for programmatic dispatch
+     |
+     |  Note: AgentTools vs ContactTools
+     |      - AgentTools: Room-bound. Used by LLM agents in chat rooms.
+     |        Has full tool suite including messaging, participants, AND contacts.
+     |      - ContactTools: Agent-level. Used by ContactEventHandler for
+     |        programmatic contact handling in CALLBACK strategy. Contact-only.
+     |
+     |  Example (from ExecutionContext):
+     |      tools = AgentTools.from_context(ctx)
+     |      await tools.send_message("Hello!", mentions=["@john"])
+     |
+     |  Example (manual construction):
+     |      tools = AgentTools(room_id, rest_client, participants=[...])
+     |      schemas = tools.get_tool_schemas("anthropic")
+     |
+     |  Method resolution order:
+     |      AgentTools
+     |      band.core.protocols.AgentToolsProtocol
+     |      typing.Protocol
+     |      typing.Generic
+     |      builtins.object
+     |
+     |  Methods defined here:
+     |
+     |  __init__(self, room_id: 'str', rest: "'AsyncRestClient'", participants: 'list[dict[str, Any]] | None' = None, *, hub_room_id: 'str | None' = None)
+     |      Initialize AgentTools for a specific room.
+     |
+     |      Args:
+     |          room_id: The room this tools instance is bound to
+     |          rest: AsyncRestClient for API calls
+     |          participants: Optional list of participants for mention resolution
+     |          hub_room_id: Optional hub-room ID. When this AgentTools instance
+     |              is bound to the hub room (room_id == hub_room_id), the
+     |              contact-management tool schemas are force-included regardless
+     |              of the ``include_contacts`` argument to schema methods. The
+     |              hub-room system prompt instructs the LLM to call contact
+     |              tools, so they must be exposed even if the adapter would
+     |              otherwise gate them.
+     |
+     |  async add_contact(self, handle: 'str', message: 'str | None' = None) -> 'Any'
+     |      Send a contact request to add someone as a contact.
+     |
+     |      Args:
+     |          handle: Handle of user/agent to add (e.g., '@john' or '@john/agent-name')
+     |          message: Optional message with the request
+     |
+     |      Returns:
+     |          Fern model with id and status ('pending' or 'approved').
+     |          Serialized to dict by execute_tool_call() at the adapter boundary.
+     |
+     |  async add_participant(self, identifier: 'str', role: 'str' = 'member') -> 'dict[str, Any]'
+     |      Add a participant to the current room.
+     |
+     |      Args:
+     |          identifier: Handle, name, or ID of the participant to add
+     |          role: Role in room - "owner", "admin", or "member" (default)
+     |
+     |      Returns:
+     |          Dict with added participant info (id, name, role, status)
+     |
+     |      Raises:
+     |          ValueError: If participant not found
+     |
+     |  async archive_memory(self, memory_id: 'str') -> 'Any'
+     |      Archive a memory (hide but preserve).
+     |
+     |      Args:
+     |          memory_id: Memory ID (UUID)
+     |
+     |      Returns:
+     |          Fern Memory model (Pydantic). Serialized to dict by
+     |          execute_tool_call() at the adapter boundary.
+     |
+     |  async create_chatroom(self, task_id: 'str | None' = None) -> 'str'
+     |      Create a new chat room.
+     |
+     |      Args:
+     |          task_id: Associated task ID (optional)
+     |
+     |      Returns:
+     |          Room ID of the created room
+     |
+     |  async execute_tool_call(self, tool_name: 'str', arguments: 'dict[str, Any]') -> 'Any'
+     |      Execute a tool call by name with validated arguments.
+     |
+     |      This is the single serialization boundary: individual tool methods
+     |      may return Pydantic models (Fern-generated or otherwise), and this
+     |      method converts them to dicts via .model_dump() so adapters always
+     |      receive JSON-serializable results.
+     |
+     |      BandToolError is re-raised so framework wrappers can translate it
+     |      into framework-native failure results. Unexpected exceptions are
+     |      caught and returned as error strings for the LLM.
+     |
+     |      Args:
+     |          tool_name: Name of the tool to execute
+     |          arguments: Arguments to pass to the tool (validated against Pydantic model)
+     |
+     |      Returns:
+     |          Tool execution result (dict, string, or other JSON-serializable value),
+     |          or error string if an unexpected failure occurred
+     |
+     |      Raises:
+     |          BandToolError: When a tool method raises a typed tool failure
+     |
+     |  async execute_tool_call_structured(self, tool_name: 'str', arguments: 'dict[str, Any]') -> 'ToolCallOutcome'
+     |      Execute a tool call and report success/failure structurally.
+     |
+     |      Identical dispatch, validation, and serialization to
+     |      :meth:`execute_tool_call`, but returns a :class:`ToolCallOutcome`
+     |      whose ``ok`` flag is the authoritative success signal. Callers
+     |      that need to react to failure (e.g. progress UIs) should branch on
+     |      ``ok`` instead of inspecting the returned string, which has no
+     |      stable error prefix. ``BandToolError`` still propagates so
+     |      framework wrappers can translate it into native failures.
+     |
+     |  async fetch_room_context(self, *, room_id: 'str', page: 'int' = 1, page_size: 'int' = 50) -> 'dict[str, Any]'
+     |      Fetch agent-relevant room messages, paginated.
+     |
+     |      Returns messages this agent sent or was mentioned in, ordered oldest
+     |      first. Used by state-reconstruction adapters (e.g. CrewAI Flow) to
+     |      rebuild durable run state from task events.
+     |
+     |  get_anthropic_tool_schemas(self, *, include_memory: 'bool' = False, include_contacts: 'bool' = True) -> "list['ToolParam']"
+     |      Get tool schemas in Anthropic format (strongly typed).
+     |
+     |  async get_memory(self, memory_id: 'str') -> 'Any'
+     |      Retrieve a specific memory by ID.
+     |
+     |      Args:
+     |          memory_id: Memory ID (UUID)
+     |
+     |      Returns:
+     |          Fern Memory model (Pydantic). Serialized to dict by
+     |          execute_tool_call() at the adapter boundary.
+     |
+     |  get_openai_tool_schemas(self, *, include_memory: 'bool' = False, include_contacts: 'bool' = True) -> 'list[dict[str, Any]]'
+     |      Get tool schemas in OpenAI format (strongly typed).
+     |
+     |  async get_participants(self) -> 'Any'
+     |      Get participants in the current room.
+     |
+     |      Returns:
+     |          List of Fern ChatParticipant models (Pydantic). Serialized to
+     |          list[dict] by execute_tool_call() at the adapter boundary.
+     |
+     |  get_tool_schemas(self, format: 'str', *, include_memory: 'bool' = False, include_contacts: 'bool' = True) -> "list[dict[str, Any]] | list['ToolParam']"
+     |      Get tool schemas in provider-specific format.
+     |
+     |      Args:
+     |          format: Target format - "openai" or "anthropic"
+     |          include_memory: If True, include memory tools (enterprise only)
+     |          include_contacts: If True (default), include contact management
+     |              tools. Adapters that gate contacts behind ``Capability.CONTACTS``
+     |              should pass ``False`` when CONTACTS is not in features.
+     |              When this AgentTools is bound to the hub room
+     |              (``self.is_hub_room``), this argument is ignored and contact
+     |              tools are always included.
+     |
+     |      Returns:
+     |          List of tool definitions in the requested format
+     |
+     |      Raises:
+     |          ValueError: If format is not "openai" or "anthropic"
+     |
+     |  async list_contact_requests(self, page: 'int' = 1, page_size: 'int' = 50, sent_status: 'str' = 'pending') -> 'Any'
+     |      List both received and sent contact requests.
+     |
+     |      Args:
+     |          page: Page number (default 1)
+     |          page_size: Items per page per direction (default 50, max 100)
+     |          sent_status: Filter sent requests by status (default 'pending')
+     |
+     |      Returns:
+     |          Fern ListAgentContactRequestsResponse (Pydantic) with .data
+     |          (.received, .sent) and .metadata. Serialized to dict by
+     |          execute_tool_call() at the adapter boundary.
+     |
+     |  async list_contacts(self, page: 'int' = 1, page_size: 'int' = 50) -> 'Any'
+     |      List agent's contacts with pagination.
+     |
+     |      Args:
+     |          page: Page number (default 1)
+     |          page_size: Items per page (default 50, max 100)
+     |
+     |      Returns:
+     |          Fern ListAgentContactsResponse (Pydantic) with .data and .metadata.
+     |          Serialized to dict by execute_tool_call() at the adapter boundary.
+     |
+     |  async list_memories(self, subject_id: 'str | None' = None, scope: 'str | None' = None, system: 'str | None' = None, type: 'str | None' = None, segment: 'str | None' = None, content_query: 'str | None' = None, page_size: 'int' = 50, status: 'str | None' = None) -> 'Any'
+     |      List memories accessible to the agent.
+     |
+     |      Args:
+     |          subject_id: Filter by subject UUID
+     |          scope: Filter by scope (subject, organization, all)
+     |          system: Filter by memory system (sensory, working, long_term)
+     |          type: Filter by memory type
+     |          segment: Filter by segment (user, agent, tool, guideline)
+     |          content_query: Full-text search query
+     |          page_size: Number of results per page (max 50)
+     |          status: Filter by status (active, superseded, archived, all)
+     |
+     |      Returns:
+     |          Fern ListAgentMemoriesResponse (Pydantic) with .data and .meta.
+     |          Serialized to dict by execute_tool_call() at the adapter boundary.
+     |
+     |  async lookup_peers(self, page: 'int' = 1, page_size: 'int' = 50) -> 'Any'
+     |      Find available peers (agents and users) on the platform.
+     |
+     |      Automatically filters to peers NOT already in the current room.
+     |
+     |      Args:
+     |          page: Page number (default 1)
+     |          page_size: Items per page (default 50, max 100)
+     |
+     |      Returns:
+     |          Fern ListAgentPeersResponse (Pydantic) with .data (list of peers)
+     |          and .metadata (pagination info). Serialized to dict by
+     |          execute_tool_call() at the adapter boundary.
+     |
+     |  async remove_contact(self, handle: 'str | None' = None, contact_id: 'str | None' = None) -> 'Any'
+     |      Remove an existing contact by handle or ID.
+     |
+     |      Args:
+     |          handle: Contact's handle
+     |          contact_id: Or contact record ID (UUID)
+     |
+     |      Returns:
+     |          Fern model with status ('removed').
+     |          Serialized to dict by execute_tool_call() at the adapter boundary.
+     |
+     |      Raises:
+     |          ValueError: If neither handle nor contact_id is provided
+     |
+     |  async remove_participant(self, identifier: 'str') -> 'dict[str, Any]'
+     |      Remove a participant from the current room.
+     |
+     |      Args:
+     |          identifier: Handle, name, or ID of the participant to remove
+     |
+     |      Returns:
+     |          Dict with removed participant info (id, name, status)
+     |
+     |      Raises:
+     |          ValueError: If participant not found in room
+     |
+     |  async respond_contact_request(self, action: 'str', handle: 'str | None' = None, request_id: 'str | None' = None) -> 'Any'
+     |      Respond to a contact request (approve, reject, or cancel).
+     |
+     |      Args:
+     |          action: Action to take ('approve', 'reject', 'cancel')
+     |          handle: Other party's handle
+     |          request_id: Or request ID (UUID)
+     |
+     |      Returns:
+     |          Fern model with id and status.
+     |          Serialized to dict by execute_tool_call() at the adapter boundary.
+     |
+     |      Raises:
+     |          ValueError: If neither handle nor request_id is provided
+     |
+     |  async send_event(self, content: 'str', message_type: 'str', metadata: 'dict[str, Any] | None' = None) -> 'Any'
+     |      Send an event to the current room.
+     |
+     |      Events don't require mentions - use for tool_call, tool_result, error, thought, task.
+     |
+     |      Args:
+     |          content: Human-readable event content
+     |          message_type: One of: tool_call, tool_result, thought, error, task
+     |          metadata: Optional structured data for the event
+     |
+     |      Returns:
+     |          Fern ChatEvent model (Pydantic). Serialized to dict by
+     |          execute_tool_call() at the adapter boundary.
+     |
+     |  async send_message(self, content: 'str', mentions: 'list[str] | list[dict[str, str]] | None' = None) -> 'Any'
+     |      Send a message to the current room.
+     |
+     |      Args:
+     |          content: Message content to send
+     |          mentions: List of participant handles (strings). SDK resolves handles to IDs.
+     |                    Format: @<username> for users, @<username>/<agent-name> for agents.
+     |                    Passing list[dict[str, str]] is deprecated; use list[str] instead.
+     |
+     |      Returns:
+     |          Fern ChatMessage model (Pydantic). Serialized to dict by
+     |          execute_tool_call() at the adapter boundary.
+     |
+     |      Raises:
+     |          ValueError: If a mentioned handle is not found in participants
+     |
+     |  async store_memory(self, content: 'str', system: 'str', type: 'str', segment: 'str', thought: 'str', scope: 'str' = 'subject', subject_id: 'str | None' = None, metadata: 'dict[str, Any] | None' = None) -> 'Any'
+     |      Store a new memory entry.
+     |
+     |      Args:
+     |          content: The memory content
+     |          system: Memory system tier (sensory, working, long_term)
+     |          type: Memory type (iconic, echoic, haptic, episodic, semantic, procedural)
+     |          segment: Logical segment (user, agent, tool, guideline)
+     |          thought: Agent's reasoning for storing this memory
+     |          scope: Visibility scope (subject, organization)
+     |          subject_id: UUID of the subject (required for subject scope)
+     |          metadata: Additional metadata (tags, references)
+     |
+     |      Returns:
+     |          Fern Memory model (Pydantic). Serialized to dict by
+     |          execute_tool_call() at the adapter boundary.
+     |
+     |  async supersede_memory(self, memory_id: 'str') -> 'Any'
+     |      Mark a memory as superseded (soft delete).
+     |
+     |      Args:
+     |          memory_id: Memory ID (UUID)
+     |
+     |      Returns:
+     |          Fern Memory model (Pydantic). Serialized to dict by
+     |          execute_tool_call() at the adapter boundary.
+     |
+     |  ----------------------------------------------------------------------
+     |  Class methods defined here:
+     |
+     |  __subclasshook__ = _proto_hook(other) from typing
+     |
+     |  from_context(ctx: "'ExecutionContext'") -> "'AgentTools'"
+     |      Create AgentTools from an ExecutionContext.
+     |
+     |      Convenience method for SDK-heavy users.
+     |
+     |      Args:
+     |          ctx: ExecutionContext to create tools from
+     |
+     |      Returns:
+     |          AgentTools instance bound to the context's room
+     |
+     |  ----------------------------------------------------------------------
+     |  Readonly properties defined here:
+     |
+     |  is_hub_room
+     |      True if this AgentTools is bound to the contact hub room.
+     |
+     |      When True, contact-management tool schemas are force-included by
+     |      the schema methods regardless of the caller's include_contacts
+     |      argument.
+     |
+     |  participants
+     |      Return a shallow copy of the cached participant list.
+     |
+     |  tool_models
+     |      Get Pydantic models for all tools.
+     |
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes defined here:
+     |
+     |  __abstractmethods__ = frozenset()
+     |
+     |  __annotations__ = {}
+     |
+     |  __parameters__ = ()
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from band.core.protocols.AgentToolsProtocol:
+     |
+     |  __dict__
+     |      dictionary for instance variables
+     |
+     |  __weakref__
+     |      list of weak references to the object
+     |
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes inherited from band.core.protocols.AgentToolsProtocol:
+     |
+     |  __non_callable_proto_members__ = {'participants'}
+     |
+     |  __protocol_attrs__ = {'add_contact', 'add_participant', 'archive_memor...
+     |
+     |  ----------------------------------------------------------------------
+     |  Class methods inherited from typing.Protocol:
+     |
+     |  __init_subclass__(*args, **kwargs)
+     |      Function to initialize subclasses.
+     |
+     |  ----------------------------------------------------------------------
+     |  Class methods inherited from typing.Generic:
+     |
+     |  __class_getitem__(...)
+     |      Parameterizes a generic class.
+     |
+     |      At least, parameterizing a generic class is the *main* thing this
+     |      method does. For example, for some generic class `Foo`, this is called
+     |      when we do `Foo[int]` - there, with `cls=Foo` and `params=int`.
+     |
+     |      However, note that this method is also called when defining generic
+     |      classes in the first place with `class Foo[T]: ...`.
+
+    class BandConfigError(BandError)
+     |  Configuration or setup problems. Actionable by developer.
+     |
+     |  Use ``with_suggestion`` to attach a "did you mean?" hint when the
+     |  user likely typoed a known parameter or capability name.
+     |
+     |  Method resolution order:
+     |      BandConfigError
+     |      BandError
+     |      builtins.Exception
+     |      builtins.BaseException
+     |      builtins.object
+     |
+     |  Class methods defined here:
+     |
+     |  with_suggestion(message: 'str', bad_name: 'str', valid_names: 'Iterable[str]', *, max_distance: 'int' = 2) -> "'BandConfigError'"
+     |      Build an error message with a typo suggestion if one is close enough.
+     |
+     |      Args:
+     |          message: Base error message.
+     |          bad_name: The unknown / misspelled name the user supplied.
+     |          valid_names: Known-good names to compare against.
+     |          max_distance: Maximum Levenshtein distance to consider a match
+     |              (default 2 — catches single-char typos and small swaps).
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from BandError:
+     |
+     |  __weakref__
+     |      list of weak references to the object
+     |
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from builtins.Exception:
+     |
+     |  __init__(self, /, *args, **kwargs)
+     |      Initialize self.  See help(type(self)) for accurate signature.
+     |
+     |  ----------------------------------------------------------------------
+     |  Static methods inherited from builtins.Exception:
+     |
+     |  __new__(*args, **kwargs) class method of builtins.Exception
+     |      Create and return a new object.  See help(type) for accurate signature.
+     |
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from builtins.BaseException:
+     |
+     |  __getattribute__(self, name, /)
+     |      Return getattr(self, name).
+     |
+     |  __reduce__(...)
+     |      Helper for pickle.
+     |
+     |  __repr__(self, /)
+     |      Return repr(self).
+     |
+     |  __setstate__(...)
+     |
+     |  __str__(self, /)
+     |      Return str(self).
+     |
+     |  add_note(...)
+     |      Exception.add_note(note) --
+     |      add a note to the exception
+     |
+     |  with_traceback(...)
+     |      Exception.with_traceback(tb) --
+     |      set self.__traceback__ to tb and return self.
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from builtins.BaseException:
+     |
+     |  __cause__
+     |      exception cause
+     |
+     |  __context__
+     |      exception context
+     |
+     |  __dict__
+     |
+     |  __suppress_context__
+     |
+     |  __traceback__
+     |
+     |  args
+
+    class BandConnectionError(BandError)
+     |  Transport failures (WebSocket, REST). Actionable by ops.
+     |
+     |  Method resolution order:
+     |      BandConnectionError
+     |      BandError
+     |      builtins.Exception
+     |      builtins.BaseException
+     |      builtins.object
+     |
+     |  Data descriptors inherited from BandError:
+     |
+     |  __weakref__
+     |      list of weak references to the object
+     |
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from builtins.Exception:
+     |
+     |  __init__(self, /, *args, **kwargs)
+     |      Initialize self.  See help(type(self)) for accurate signature.
+     |
+     |  ----------------------------------------------------------------------
+     |  Static methods inherited from builtins.Exception:
+     |
+     |  __new__(*args, **kwargs) class method of builtins.Exception
+     |      Create and return a new object.  See help(type) for accurate signature.
+     |
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from builtins.BaseException:
+     |
+     |  __getattribute__(self, name, /)
+     |      Return getattr(self, name).
+     |
+     |  __reduce__(...)
+     |      Helper for pickle.
+     |
+     |  __repr__(self, /)
+     |      Return repr(self).
+     |
+     |  __setstate__(...)
+     |
+     |  __str__(self, /)
+     |      Return str(self).
+     |
+     |  add_note(...)
+     |      Exception.add_note(note) --
+     |      add a note to the exception
+     |
+     |  with_traceback(...)
+     |      Exception.with_traceback(tb) --
+     |      set self.__traceback__ to tb and return self.
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from builtins.BaseException:
+     |
+     |  __cause__
+     |      exception cause
+     |
+     |  __context__
+     |      exception context
+     |
+     |  __dict__
+     |
+     |  __suppress_context__
+     |
+     |  __traceback__
+     |
+     |  args
+
+    class BandError(builtins.Exception)
+     |  Base for all SDK exceptions.
+     |
+     |  Method resolution order:
+     |      BandError
+     |      builtins.Exception
+     |      builtins.BaseException
+     |      builtins.object
+     |
+     |  Data descriptors defined here:
+     |
+     |  __weakref__
+     |      list of weak references to the object
+     |
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from builtins.Exception:
+     |
+     |  __init__(self, /, *args, **kwargs)
+     |      Initialize self.  See help(type(self)) for accurate signature.
+     |
+     |  ----------------------------------------------------------------------
+     |  Static methods inherited from builtins.Exception:
+     |
+     |  __new__(*args, **kwargs) class method of builtins.Exception
+     |      Create and return a new object.  See help(type) for accurate signature.
+     |
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from builtins.BaseException:
+     |
+     |  __getattribute__(self, name, /)
+     |      Return getattr(self, name).
+     |
+     |  __reduce__(...)
+     |      Helper for pickle.
+     |
+     |  __repr__(self, /)
+     |      Return repr(self).
+     |
+     |  __setstate__(...)
+     |
+     |  __str__(self, /)
+     |      Return str(self).
+     |
+     |  add_note(...)
+     |      Exception.add_note(note) --
+     |      add a note to the exception
+     |
+     |  with_traceback(...)
+     |      Exception.with_traceback(tb) --
+     |      set self.__traceback__ to tb and return self.
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from builtins.BaseException:
+     |
+     |  __cause__
+     |      exception cause
+     |
+     |  __context__
+     |      exception context
+     |
+     |  __dict__
+     |
+     |  __suppress_context__
+     |
+     |  __traceback__
+     |
+     |  args
+
+    class BandLink(builtins.object)
+     |  BandLink(agent_id: 'str', api_key: 'str', ws_url: 'str' = 'wss://app.band.ai/api/v1/socket/websocket', rest_url: 'str' = 'https://app.band.ai')
+     |
+     |  Live link to Band platform.
+     |
+     |  Extracted from BandAgent - handles WebSocket connection and event dispatch.
+     |  REST client exposed directly via self.rest for API calls.
+     |
+     |  Example:
+     |      import logging
+     |      logger = logging.getLogger(__name__)
+     |
+     |      link = BandLink(agent_id="...", api_key="...")
+     |      await link.connect()
+     |      await link.subscribe_agent_rooms(agent_id)
+     |
+     |      async for event in link:
+     |          match event:
+     |              case MessageEvent(payload=msg):
+     |                  logger.info("Message: %s", msg.content)
+     |              case RoomAddedEvent(room_id=rid):
+     |                  await link.subscribe_room(rid)
+     |
+     |  Methods defined here:
+     |
+     |  __aiter__(self)
+     |      Return self to allow async iteration over events.
+     |
+     |  async __anext__(self) -> 'PlatformEvent'
+     |      Get next event from the queue. Blocks until an event is available.
+     |
+     |  __init__(self, agent_id: 'str', api_key: 'str', ws_url: 'str' = 'wss://app.band.ai/api/v1/socket/websocket', rest_url: 'str' = 'https://app.band.ai')
+     |      Initialize self.  See help(type(self)) for accurate signature.
+     |
+     |  async connect(self) -> 'None'
+     |      Connect WebSocket.
+     |
+     |      Extracted from BandAgent.start() lines 158-164.
+     |
+     |  async disconnect(self) -> 'None'
+     |      Disconnect WebSocket.
+     |
+     |      Extracted from BandAgent.stop() lines 193-195.
+     |
+     |  async get_next_message(self, room_id: 'str') -> 'PlatformMessage | None'
+     |      Get the next actionable message for a room from the server.
+     |
+     |      Returns:
+     |          ``PlatformMessage`` if there's an actionable message, or ``None``
+     |          if the platform returned no content (204). ``None`` means *the
+     |          platform told us there's nothing pending* — not "the call failed."
+     |
+     |      Raises:
+     |          ApiError: REST call failed with a non-204 status.
+     |          Exception: Transport-level failure (connection error, timeout).
+     |              Callers that want to swallow transient failures should wrap
+     |              this call explicitly; the previous behavior of conflating
+     |              "no pending" with "lookup failed" silently dropped messages
+     |              at the claim step.
+     |
+     |  async get_stale_processing_messages(self, room_id: 'str') -> 'list[PlatformMessage]'
+     |      Get messages stuck in 'processing' state for a room.
+     |
+     |      On agent restart, messages that were being processed when the agent
+     |      crashed remain in 'processing' state. The long-running runtime uses
+     |      this as an explicit recovery sweep at startup.
+     |
+     |      Note: ``get_next_message`` (the ``/next`` REST endpoint) already
+     |      includes stuck-processing messages in its "actionable" result set —
+     |      see ``Chat.get_next_actionable_message`` on the platform side, which
+     |      excludes only ``processed``. Callers that drive recovery solely
+     |      through ``/next`` (e.g. the bridge's rehydration nudge and
+     |      ``OneShotInvoker``'s claim step) do not need to call this method;
+     |      it exists for paths that want to drain *every* stuck message up
+     |      front rather than one-per-room.
+     |
+     |      Returns:
+     |          List of PlatformMessage objects in processing state.
+     |
+     |  async mark_failed(self, room_id: 'str', message_id: 'str', error: 'str') -> 'bool'
+     |      Mark message as failed on the server.
+     |
+     |      Records the error and may trigger retry logic on the server side.
+     |
+     |  async mark_processed(self, room_id: 'str', message_id: 'str') -> 'bool'
+     |      Mark message as successfully processed on the server.
+     |
+     |      Clears the message from unprocessed queue.
+     |
+     |  async mark_processing(self, room_id: 'str', message_id: 'str') -> 'bool'
+     |      Mark message as being processed on the server.
+     |
+     |      Tells the server this message is being handled, so /next won't return it.
+     |
+     |  queue_event(self, event: 'PlatformEvent') -> 'None'
+     |      Queue a synthetic event for processing (public API).
+     |
+     |  async run_forever(self) -> 'None'
+     |      Run until interrupted.
+     |
+     |      From BandAgent.run() lines 208-209.
+     |
+     |  async subscribe_agent_contacts(self, agent_id: 'str') -> 'None'
+     |      Subscribe to agent contact events.
+     |
+     |      Events: contact_request_received, contact_request_updated,
+     |              contact_added, contact_removed
+     |
+     |  async subscribe_agent_rooms(self, agent_id: 'str') -> 'None'
+     |      Subscribe to agent room events (room_added/removed).
+     |
+     |      From BandAgent.start() lines 167-171.
+     |
+     |  async subscribe_room(self, room_id: 'str') -> 'None'
+     |      Subscribe to room messages and participants.
+     |
+     |      Extracted from BandAgent._subscribe_to_room() lines 724-746.
+     |      Wraps each channel join so a single room failure doesn't crash
+     |      the entire subscription sequence.
+     |
+     |  async unsubscribe_agent_contacts(self) -> 'None'
+     |      Unsubscribe from agent contacts channel.
+     |
+     |  async unsubscribe_room(self, room_id: 'str') -> 'None'
+     |      Unsubscribe from room.
+     |
+     |      Extracted from BandAgent._unsubscribe_from_room() lines 748-769.
+     |
+     |  ----------------------------------------------------------------------
+     |  Readonly properties defined here:
+     |
+     |  is_connected
+     |
+     |  last_disconnect_reason
+     |      Most recent terminal WebSocket disconnect reason, if reported.
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |
+     |  __dict__
+     |      dictionary for instance variables
+     |
+     |  __weakref__
+     |      list of weak references to the object
+
+    class BandToolError(BandError)
+     |  Tool execution failures. Actionable by adapter/LLM.
+     |
+     |  Method resolution order:
+     |      BandToolError
+     |      BandError
+     |      builtins.Exception
+     |      builtins.BaseException
+     |      builtins.object
+     |
+     |  Data descriptors inherited from BandError:
+     |
+     |  __weakref__
+     |      list of weak references to the object
+     |
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from builtins.Exception:
+     |
+     |  __init__(self, /, *args, **kwargs)
+     |      Initialize self.  See help(type(self)) for accurate signature.
+     |
+     |  ----------------------------------------------------------------------
+     |  Static methods inherited from builtins.Exception:
+     |
+     |  __new__(*args, **kwargs) class method of builtins.Exception
+     |      Create and return a new object.  See help(type) for accurate signature.
+     |
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from builtins.BaseException:
+     |
+     |  __getattribute__(self, name, /)
+     |      Return getattr(self, name).
+     |
+     |  __reduce__(...)
+     |      Helper for pickle.
+     |
+     |  __repr__(self, /)
+     |      Return repr(self).
+     |
+     |  __setstate__(...)
+     |
+     |  __str__(self, /)
+     |      Return str(self).
+     |
+     |  add_note(...)
+     |      Exception.add_note(note) --
+     |      add a note to the exception
+     |
+     |  with_traceback(...)
+     |      Exception.with_traceback(tb) --
+     |      set self.__traceback__ to tb and return self.
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from builtins.BaseException:
+     |
+     |  __cause__
+     |      exception cause
+     |
+     |  __context__
+     |      exception context
+     |
+     |  __dict__
+     |
+     |  __suppress_context__
+     |
+     |  __traceback__
+     |
+     |  args
+
+    class Capability(builtins.str, enum.Enum)
+     |  Capability(*values)
+     |
+     |  Platform tool categories an adapter can expose to the LLM.
+     |
+     |  These control tool-schema inclusion only -- they do NOT affect
+     |  runtime event routing (WebSocket subscriptions, contact-event
+     |  strategies, hub-room creation).  Those remain under
+     |  ContactEventConfig / ContactEventStrategy in runtime/types.py.
+     |
+     |  Method resolution order:
+     |      Capability
+     |      builtins.str
+     |      enum.Enum
+     |      builtins.object
+     |
+     |  Methods defined here:
+     |
+     |  __format__(self, format_spec) from enum.Enum
+     |      Default object formatter.
+     |
+     |      Return str(self) if format_spec is empty. Raise TypeError otherwise.
+     |
+     |  __new__(cls, value) from enum.Enum
+     |      Create and return a new object.  See help(type) for accurate signature.
+     |
+     |  __repr__(self) from enum.Enum
+     |      Return repr(self).
+     |
+     |  __str__(self) from enum.Enum
+     |      Return str(self).
+     |
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes defined here:
+     |
+     |  CONTACTS = <Capability.CONTACTS: 'contacts'>
+     |
+     |  MEMORY = <Capability.MEMORY: 'memory'>
+     |
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from builtins.str:
+     |
+     |  __add__(self, value, /)
+     |      Return self+value.
+     |
+     |  __contains__(self, key, /)
+     |      Return bool(key in self).
+     |
+     |  __eq__(self, value, /)
+     |      Return self==value.
+     |
+     |  __ge__(self, value, /)
+     |      Return self>=value.
+     |
+     |  __getitem__(self, key, /)
+     |      Return self[key].
+     |
+     |  __getnewargs__(...)
+     |
+     |  __gt__(self, value, /)
+     |      Return self>value.
+     |
+     |  __hash__(self, /)
+     |      Return hash(self).
+     |
+     |  __iter__(self, /)
+     |      Implement iter(self).
+     |
+     |  __le__(self, value, /)
+     |      Return self<=value.
+     |
+     |  __len__(self, /)
+     |      Return len(self).
+     |
+     |  __lt__(self, value, /)
+     |      Return self<value.
+     |
+     |  __mod__(self, value, /)
+     |      Return self%value.
+     |
+     |  __mul__(self, value, /)
+     |      Return self*value.
+     |
+     |  __ne__(self, value, /)
+     |      Return self!=value.
+     |
+     |  __rmod__(self, value, /)
+     |      Return value%self.
+     |
+     |  __rmul__(self, value, /)
+     |      Return value*self.
+     |
+     |  __sizeof__(self, /)
+     |      Return the size of the string in memory, in bytes.
+     |
+     |  capitalize(self, /)
+     |      Return a capitalized version of the string.
+     |
+     |      More specifically, make the first character have upper case and the rest lower
+     |      case.
+     |
+     |  casefold(self, /)
+     |      Return a version of the string suitable for caseless comparisons.
+     |
+     |  center(self, width, fillchar=' ', /)
+     |      Return a centered string of length width.
+     |
+     |      Padding is done using the specified fill character (default is a space).
+     |
+     |  count(...)
+     |      S.count(sub[, start[, end]]) -> int
+     |
+     |      Return the number of non-overlapping occurrences of substring sub in
+     |      string S[start:end].  Optional arguments start and end are
+     |      interpreted as in slice notation.
+     |
+     |  encode(self, /, encoding='utf-8', errors='strict')
+     |      Encode the string using the codec registered for encoding.
+     |
+     |      encoding
+     |        The encoding in which to encode the string.
+     |      errors
+     |        The error handling scheme to use for encoding errors.
+     |        The default is 'strict' meaning that encoding errors raise a
+     |        UnicodeEncodeError.  Other possible values are 'ignore', 'replace' and
+     |        'xmlcharrefreplace' as well as any other name registered with
+     |        codecs.register_error that can handle UnicodeEncodeErrors.
+     |
+     |  endswith(...)
+     |      S.endswith(suffix[, start[, end]]) -> bool
+     |
+     |      Return True if S ends with the specified suffix, False otherwise.
+     |      With optional start, test S beginning at that position.
+     |      With optional end, stop comparing S at that position.
+     |      suffix can also be a tuple of strings to try.
+     |
+     |  expandtabs(self, /, tabsize=8)
+     |      Return a copy where all tab characters are expanded using spaces.
+     |
+     |      If tabsize is not given, a tab size of 8 characters is assumed.
+     |
+     |  find(...)
+     |      S.find(sub[, start[, end]]) -> int
+     |
+     |      Return the lowest index in S where substring sub is found,
+     |      such that sub is contained within S[start:end].  Optional
+     |      arguments start and end are interpreted as in slice notation.
+     |
+     |      Return -1 on failure.
+     |
+     |  format(...)
+     |      S.format(*args, **kwargs) -> str
+     |
+     |      Return a formatted version of S, using substitutions from args and kwargs.
+     |      The substitutions are identified by braces ('{' and '}').
+     |
+     |  format_map(...)
+     |      S.format_map(mapping) -> str
+     |
+     |      Return a formatted version of S, using substitutions from mapping.
+     |      The substitutions are identified by braces ('{' and '}').
+     |
+     |  index(...)
+     |      S.index(sub[, start[, end]]) -> int
+     |
+     |      Return the lowest index in S where substring sub is found,
+     |      such that sub is contained within S[start:end].  Optional
+     |      arguments start and end are interpreted as in slice notation.
+     |
+     |      Raises ValueError when the substring is not found.
+     |
+     |  isalnum(self, /)
+     |      Return True if the string is an alpha-numeric string, False otherwise.
+     |
+     |      A string is alpha-numeric if all characters in the string are alpha-numeric and
+     |      there is at least one character in the string.
+     |
+     |  isalpha(self, /)
+     |      Return True if the string is an alphabetic string, False otherwise.
+     |
+     |      A string is alphabetic if all characters in the string are alphabetic and there
+     |      is at least one character in the string.
+     |
+     |  isascii(self, /)
+     |      Return True if all characters in the string are ASCII, False otherwise.
+     |
+     |      ASCII characters have code points in the range U+0000-U+007F.
+     |      Empty string is ASCII too.
+     |
+     |  isdecimal(self, /)
+     |      Return True if the string is a decimal string, False otherwise.
+     |
+     |      A string is a decimal string if all characters in the string are decimal and
+     |      there is at least one character in the string.
+     |
+     |  isdigit(self, /)
+     |      Return True if the string is a digit string, False otherwise.
+     |
+     |      A string is a digit string if all characters in the string are digits and there
+     |      is at least one character in the string.
+     |
+     |  isidentifier(self, /)
+     |      Return True if the string is a valid Python identifier, False otherwise.
+     |
+     |      Call keyword.iskeyword(s) to test whether string s is a reserved identifier,
+     |      such as "def" or "class".
+     |
+     |  islower(self, /)
+     |      Return True if the string is a lowercase string, False otherwise.
+     |
+     |      A string is lowercase if all cased characters in the string are lowercase and
+     |      there is at least one cased character in the string.
+     |
+     |  isnumeric(self, /)
+     |      Return True if the string is a numeric string, False otherwise.
+     |
+     |      A string is numeric if all characters in the string are numeric and there is at
+     |      least one character in the string.
+     |
+     |  isprintable(self, /)
+     |      Return True if the string is printable, False otherwise.
+     |
+     |      A string is printable if all of its characters are considered printable in
+     |      repr() or if it is empty.
+     |
+     |  isspace(self, /)
+     |      Return True if the string is a whitespace string, False otherwise.
+     |
+     |      A string is whitespace if all characters in the string are whitespace and there
+     |      is at least one character in the string.
+     |
+     |  istitle(self, /)
+     |      Return True if the string is a title-cased string, False otherwise.
+     |
+     |      In a title-cased string, upper- and title-case characters may only
+     |      follow uncased characters and lowercase characters only cased ones.
+     |
+     |  isupper(self, /)
+     |      Return True if the string is an uppercase string, False otherwise.
+     |
+     |      A string is uppercase if all cased characters in the string are uppercase and
+     |      there is at least one cased character in the string.
+     |
+     |  join(self, iterable, /)
+     |      Concatenate any number of strings.
+     |
+     |      The string whose method is called is inserted in between each given string.
+     |      The result is returned as a new string.
+     |
+     |      Example: '.'.join(['ab', 'pq', 'rs']) -> 'ab.pq.rs'
+     |
+     |  ljust(self, width, fillchar=' ', /)
+     |      Return a left-justified string of length width.
+     |
+     |      Padding is done using the specified fill character (default is a space).
+     |
+     |  lower(self, /)
+     |      Return a copy of the string converted to lowercase.
+     |
+     |  lstrip(self, chars=None, /)
+     |      Return a copy of the string with leading whitespace removed.
+     |
+     |      If chars is given and not None, remove characters in chars instead.
+     |
+     |  partition(self, sep, /)
+     |      Partition the string into three parts using the given separator.
+     |
+     |      This will search for the separator in the string.  If the separator is found,
+     |      returns a 3-tuple containing the part before the separator, the separator
+     |      itself, and the part after it.
+     |
+     |      If the separator is not found, returns a 3-tuple containing the original string
+     |      and two empty strings.
+     |
+     |  removeprefix(self, prefix, /)
+     |      Return a str with the given prefix string removed if present.
+     |
+     |      If the string starts with the prefix string, return string[len(prefix):].
+     |      Otherwise, return a copy of the original string.
+     |
+     |  removesuffix(self, suffix, /)
+     |      Return a str with the given suffix string removed if present.
+     |
+     |      If the string ends with the suffix string and that suffix is not empty,
+     |      return string[:-len(suffix)]. Otherwise, return a copy of the original
+     |      string.
+     |
+     |  replace(self, old, new, count=-1, /)
+     |      Return a copy with all occurrences of substring old replaced by new.
+     |
+     |        count
+     |          Maximum number of occurrences to replace.
+     |          -1 (the default value) means replace all occurrences.
+     |
+     |      If the optional argument count is given, only the first count occurrences are
+     |      replaced.
+     |
+     |  rfind(...)
+     |      S.rfind(sub[, start[, end]]) -> int
+     |
+     |      Return the highest index in S where substring sub is found,
+     |      such that sub is contained within S[start:end].  Optional
+     |      arguments start and end are interpreted as in slice notation.
+     |
+     |      Return -1 on failure.
+     |
+     |  rindex(...)
+     |      S.rindex(sub[, start[, end]]) -> int
+     |
+     |      Return the highest index in S where substring sub is found,
+     |      such that sub is contained within S[start:end].  Optional
+     |      arguments start and end are interpreted as in slice notation.
+     |
+     |      Raises ValueError when the substring is not found.
+     |
+     |  rjust(self, width, fillchar=' ', /)
+     |      Return a right-justified string of length width.
+     |
+     |      Padding is done using the specified fill character (default is a space).
+     |
+     |  rpartition(self, sep, /)
+     |      Partition the string into three parts using the given separator.
+     |
+     |      This will search for the separator in the string, starting at the end. If
+     |      the separator is found, returns a 3-tuple containing the part before the
+     |      separator, the separator itself, and the part after it.
+     |
+     |      If the separator is not found, returns a 3-tuple containing two empty strings
+     |      and the original string.
+     |
+     |  rsplit(self, /, sep=None, maxsplit=-1)
+     |      Return a list of the substrings in the string, using sep as the separator string.
+     |
+     |        sep
+     |          The separator used to split the string.
+     |
+     |          When set to None (the default value), will split on any whitespace
+     |          character (including \n \r \t \f and spaces) and will discard
+     |          empty strings from the result.
+     |        maxsplit
+     |          Maximum number of splits.
+     |          -1 (the default value) means no limit.
+     |
+     |      Splitting starts at the end of the string and works to the front.
+     |
+     |  rstrip(self, chars=None, /)
+     |      Return a copy of the string with trailing whitespace removed.
+     |
+     |      If chars is given and not None, remove characters in chars instead.
+     |
+     |  split(self, /, sep=None, maxsplit=-1)
+     |      Return a list of the substrings in the string, using sep as the separator string.
+     |
+     |        sep
+     |          The separator used to split the string.
+     |
+     |          When set to None (the default value), will split on any whitespace
+     |          character (including \n \r \t \f and spaces) and will discard
+     |          empty strings from the result.
+     |        maxsplit
+     |          Maximum number of splits.
+     |          -1 (the default value) means no limit.
+     |
+     |      Splitting starts at the front of the string and works to the end.
+     |
+     |      Note, str.split() is mainly useful for data that has been intentionally
+     |      delimited.  With natural text that includes punctuation, consider using
+     |      the regular expression module.
+     |
+     |  splitlines(self, /, keepends=False)
+     |      Return a list of the lines in the string, breaking at line boundaries.
+     |
+     |      Line breaks are not included in the resulting list unless keepends is given and
+     |      true.
+     |
+     |  startswith(...)
+     |      S.startswith(prefix[, start[, end]]) -> bool
+     |
+     |      Return True if S starts with the specified prefix, False otherwise.
+     |      With optional start, test S beginning at that position.
+     |      With optional end, stop comparing S at that position.
+     |      prefix can also be a tuple of strings to try.
+     |
+     |  strip(self, chars=None, /)
+     |      Return a copy of the string with leading and trailing whitespace removed.
+     |
+     |      If chars is given and not None, remove characters in chars instead.
+     |
+     |  swapcase(self, /)
+     |      Convert uppercase characters to lowercase and lowercase characters to uppercase.
+     |
+     |  title(self, /)
+     |      Return a version of the string where each word is titlecased.
+     |
+     |      More specifically, words start with uppercased characters and all remaining
+     |      cased characters have lower case.
+     |
+     |  translate(self, table, /)
+     |      Replace each character in the string using the given translation table.
+     |
+     |        table
+     |          Translation table, which must be a mapping of Unicode ordinals to
+     |          Unicode ordinals, strings, or None.
+     |
+     |      The table must implement lookup/indexing via __getitem__, for instance a
+     |      dictionary or list.  If this operation raises LookupError, the character is
+     |      left untouched.  Characters mapped to None are deleted.
+     |
+     |  upper(self, /)
+     |      Return a copy of the string converted to uppercase.
+     |
+     |  zfill(self, width, /)
+     |      Pad a numeric string with zeros on the left, to fill a field of the given width.
+     |
+     |      The string is never truncated.
+     |
+     |  ----------------------------------------------------------------------
+     |  Static methods inherited from builtins.str:
+     |
+     |  maketrans(...)
+     |      Return a translation table usable for str.translate().
+     |
+     |      If there is only one argument, it must be a dictionary mapping Unicode
+     |      ordinals (integers) or characters to Unicode ordinals, strings or None.
+     |      Character keys will be then converted to ordinals.
+     |      If there are two arguments, they must be strings of equal length, and
+     |      in the resulting dictionary, each character in x will be mapped to the
+     |      character at the same position in y. If there is a third argument, it
+     |      must be a string, whose characters will be mapped to None in the result.
+     |
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from enum.Enum:
+     |
+     |  __dir__(self)
+     |      Returns public methods and other interesting attributes.
+     |
+     |  __init__(self, *args, **kwds)
+     |      Initialize self.  See help(type(self)) for accurate signature.
+     |
+     |  __reduce_ex__(self, proto)
+     |      Helper for pickle.
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from enum.Enum:
+     |
+     |  name
+     |      The name of the Enum member.
+     |
+     |  value
+     |      The value of the Enum member.
+     |
+     |  ----------------------------------------------------------------------
+     |  Readonly properties inherited from enum.EnumType:
+     |
+     |  __members__
+     |      Returns a mapping of member name->value.
+     |
+     |      This mapping lists all enum members, including aliases. Note that this
+     |      is a read-only view of the internal mapping.
+
+    class ConversationContext(builtins.object)
+     |  ConversationContext(room_id: 'str', messages: 'list[dict[str, Any]]', participants: 'list[dict[str, Any]]', hydrated_at: 'datetime') -> None
+     |
+     |  Hydrated context for a room.
+     |
+     |  Contains conversation history and participant information
+     |  for context-aware processing.
+     |
+     |  Methods defined here:
+     |
+     |  __eq__(self, other)
+     |      Return self==value.
+     |
+     |  __init__(self, room_id: 'str', messages: 'list[dict[str, Any]]', participants: 'list[dict[str, Any]]', hydrated_at: 'datetime') -> None
+     |      Initialize self.  See help(type(self)) for accurate signature.
+     |
+     |  __repr__(self)
+     |      Return repr(self).
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |
+     |  __dict__
+     |      dictionary for instance variables
+     |
+     |  __weakref__
+     |      list of weak references to the object
+     |
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes defined here:
+     |
+     |  __annotations__ = {'hydrated_at': 'datetime', 'messages': 'list[dict[s...
+     |
+     |  __dataclass_fields__ = {'hydrated_at': Field(name='hydrated_at',type='...
+     |
+     |  __dataclass_params__ = _DataclassParams(init=True,repr=True,eq=True,or...
+     |
+     |  __hash__ = None
+     |
+     |  __match_args__ = ('room_id', 'messages', 'participants', 'hydrated_at'...
+
+    class Emit(builtins.str, enum.Enum)
+     |  Emit(*values)
+     |
+     |  Event types an adapter can emit to the platform.
+     |
+     |  Method resolution order:
+     |      Emit
+     |      builtins.str
+     |      enum.Enum
+     |      builtins.object
+     |
+     |  Methods defined here:
+     |
+     |  __format__(self, format_spec) from enum.Enum
+     |      Default object formatter.
+     |
+     |      Return str(self) if format_spec is empty. Raise TypeError otherwise.
+     |
+     |  __new__(cls, value) from enum.Enum
+     |      Create and return a new object.  See help(type) for accurate signature.
+     |
+     |  __repr__(self) from enum.Enum
+     |      Return repr(self).
+     |
+     |  __str__(self) from enum.Enum
+     |      Return str(self).
+     |
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes defined here:
+     |
+     |  EXECUTION = <Emit.EXECUTION: 'execution'>
+     |
+     |  TASK_EVENTS = <Emit.TASK_EVENTS: 'task_events'>
+     |
+     |  THOUGHTS = <Emit.THOUGHTS: 'thoughts'>
+     |
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from builtins.str:
+     |
+     |  __add__(self, value, /)
+     |      Return self+value.
+     |
+     |  __contains__(self, key, /)
+     |      Return bool(key in self).
+     |
+     |  __eq__(self, value, /)
+     |      Return self==value.
+     |
+     |  __ge__(self, value, /)
+     |      Return self>=value.
+     |
+     |  __getitem__(self, key, /)
+     |      Return self[key].
+     |
+     |  __getnewargs__(...)
+     |
+     |  __gt__(self, value, /)
+     |      Return self>value.
+     |
+     |  __hash__(self, /)
+     |      Return hash(self).
+     |
+     |  __iter__(self, /)
+     |      Implement iter(self).
+     |
+     |  __le__(self, value, /)
+     |      Return self<=value.
+     |
+     |  __len__(self, /)
+     |      Return len(self).
+     |
+     |  __lt__(self, value, /)
+     |      Return self<value.
+     |
+     |  __mod__(self, value, /)
+     |      Return self%value.
+     |
+     |  __mul__(self, value, /)
+     |      Return self*value.
+     |
+     |  __ne__(self, value, /)
+     |      Return self!=value.
+     |
+     |  __rmod__(self, value, /)
+     |      Return value%self.
+     |
+     |  __rmul__(self, value, /)
+     |      Return value*self.
+     |
+     |  __sizeof__(self, /)
+     |      Return the size of the string in memory, in bytes.
+     |
+     |  capitalize(self, /)
+     |      Return a capitalized version of the string.
+     |
+     |      More specifically, make the first character have upper case and the rest lower
+     |      case.
+     |
+     |  casefold(self, /)
+     |      Return a version of the string suitable for caseless comparisons.
+     |
+     |  center(self, width, fillchar=' ', /)
+     |      Return a centered string of length width.
+     |
+     |      Padding is done using the specified fill character (default is a space).
+     |
+     |  count(...)
+     |      S.count(sub[, start[, end]]) -> int
+     |
+     |      Return the number of non-overlapping occurrences of substring sub in
+     |      string S[start:end].  Optional arguments start and end are
+     |      interpreted as in slice notation.
+     |
+     |  encode(self, /, encoding='utf-8', errors='strict')
+     |      Encode the string using the codec registered for encoding.
+     |
+     |      encoding
+     |        The encoding in which to encode the string.
+     |      errors
+     |        The error handling scheme to use for encoding errors.
+     |        The default is 'strict' meaning that encoding errors raise a
+     |        UnicodeEncodeError.  Other possible values are 'ignore', 'replace' and
+     |        'xmlcharrefreplace' as well as any other name registered with
+     |        codecs.register_error that can handle UnicodeEncodeErrors.
+     |
+     |  endswith(...)
+     |      S.endswith(suffix[, start[, end]]) -> bool
+     |
+     |      Return True if S ends with the specified suffix, False otherwise.
+     |      With optional start, test S beginning at that position.
+     |      With optional end, stop comparing S at that position.
+     |      suffix can also be a tuple of strings to try.
+     |
+     |  expandtabs(self, /, tabsize=8)
+     |      Return a copy where all tab characters are expanded using spaces.
+     |
+     |      If tabsize is not given, a tab size of 8 characters is assumed.
+     |
+     |  find(...)
+     |      S.find(sub[, start[, end]]) -> int
+     |
+     |      Return the lowest index in S where substring sub is found,
+     |      such that sub is contained within S[start:end].  Optional
+     |      arguments start and end are interpreted as in slice notation.
+     |
+     |      Return -1 on failure.
+     |
+     |  format(...)
+     |      S.format(*args, **kwargs) -> str
+     |
+     |      Return a formatted version of S, using substitutions from args and kwargs.
+     |      The substitutions are identified by braces ('{' and '}').
+     |
+     |  format_map(...)
+     |      S.format_map(mapping) -> str
+     |
+     |      Return a formatted version of S, using substitutions from mapping.
+     |      The substitutions are identified by braces ('{' and '}').
+     |
+     |  index(...)
+     |      S.index(sub[, start[, end]]) -> int
+     |
+     |      Return the lowest index in S where substring sub is found,
+     |      such that sub is contained within S[start:end].  Optional
+     |      arguments start and end are interpreted as in slice notation.
+     |
+     |      Raises ValueError when the substring is not found.
+     |
+     |  isalnum(self, /)
+     |      Return True if the string is an alpha-numeric string, False otherwise.
+     |
+     |      A string is alpha-numeric if all characters in the string are alpha-numeric and
+     |      there is at least one character in the string.
+     |
+     |  isalpha(self, /)
+     |      Return True if the string is an alphabetic string, False otherwise.
+     |
+     |      A string is alphabetic if all characters in the string are alphabetic and there
+     |      is at least one character in the string.
+     |
+     |  isascii(self, /)
+     |      Return True if all characters in the string are ASCII, False otherwise.
+     |
+     |      ASCII characters have code points in the range U+0000-U+007F.
+     |      Empty string is ASCII too.
+     |
+     |  isdecimal(self, /)
+     |      Return True if the string is a decimal string, False otherwise.
+     |
+     |      A string is a decimal string if all characters in the string are decimal and
+     |      there is at least one character in the string.
+     |
+     |  isdigit(self, /)
+     |      Return True if the string is a digit string, False otherwise.
+     |
+     |      A string is a digit string if all characters in the string are digits and there
+     |      is at least one character in the string.
+     |
+     |  isidentifier(self, /)
+     |      Return True if the string is a valid Python identifier, False otherwise.
+     |
+     |      Call keyword.iskeyword(s) to test whether string s is a reserved identifier,
+     |      such as "def" or "class".
+     |
+     |  islower(self, /)
+     |      Return True if the string is a lowercase string, False otherwise.
+     |
+     |      A string is lowercase if all cased characters in the string are lowercase and
+     |      there is at least one cased character in the string.
+     |
+     |  isnumeric(self, /)
+     |      Return True if the string is a numeric string, False otherwise.
+     |
+     |      A string is numeric if all characters in the string are numeric and there is at
+     |      least one character in the string.
+     |
+     |  isprintable(self, /)
+     |      Return True if the string is printable, False otherwise.
+     |
+     |      A string is printable if all of its characters are considered printable in
+     |      repr() or if it is empty.
+     |
+     |  isspace(self, /)
+     |      Return True if the string is a whitespace string, False otherwise.
+     |
+     |      A string is whitespace if all characters in the string are whitespace and there
+     |      is at least one character in the string.
+     |
+     |  istitle(self, /)
+     |      Return True if the string is a title-cased string, False otherwise.
+     |
+     |      In a title-cased string, upper- and title-case characters may only
+     |      follow uncased characters and lowercase characters only cased ones.
+     |
+     |  isupper(self, /)
+     |      Return True if the string is an uppercase string, False otherwise.
+     |
+     |      A string is uppercase if all cased characters in the string are uppercase and
+     |      there is at least one cased character in the string.
+     |
+     |  join(self, iterable, /)
+     |      Concatenate any number of strings.
+     |
+     |      The string whose method is called is inserted in between each given string.
+     |      The result is returned as a new string.
+     |
+     |      Example: '.'.join(['ab', 'pq', 'rs']) -> 'ab.pq.rs'
+     |
+     |  ljust(self, width, fillchar=' ', /)
+     |      Return a left-justified string of length width.
+     |
+     |      Padding is done using the specified fill character (default is a space).
+     |
+     |  lower(self, /)
+     |      Return a copy of the string converted to lowercase.
+     |
+     |  lstrip(self, chars=None, /)
+     |      Return a copy of the string with leading whitespace removed.
+     |
+     |      If chars is given and not None, remove characters in chars instead.
+     |
+     |  partition(self, sep, /)
+     |      Partition the string into three parts using the given separator.
+     |
+     |      This will search for the separator in the string.  If the separator is found,
+     |      returns a 3-tuple containing the part before the separator, the separator
+     |      itself, and the part after it.
+     |
+     |      If the separator is not found, returns a 3-tuple containing the original string
+     |      and two empty strings.
+     |
+     |  removeprefix(self, prefix, /)
+     |      Return a str with the given prefix string removed if present.
+     |
+     |      If the string starts with the prefix string, return string[len(prefix):].
+     |      Otherwise, return a copy of the original string.
+     |
+     |  removesuffix(self, suffix, /)
+     |      Return a str with the given suffix string removed if present.
+     |
+     |      If the string ends with the suffix string and that suffix is not empty,
+     |      return string[:-len(suffix)]. Otherwise, return a copy of the original
+     |      string.
+     |
+     |  replace(self, old, new, count=-1, /)
+     |      Return a copy with all occurrences of substring old replaced by new.
+     |
+     |        count
+     |          Maximum number of occurrences to replace.
+     |          -1 (the default value) means replace all occurrences.
+     |
+     |      If the optional argument count is given, only the first count occurrences are
+     |      replaced.
+     |
+     |  rfind(...)
+     |      S.rfind(sub[, start[, end]]) -> int
+     |
+     |      Return the highest index in S where substring sub is found,
+     |      such that sub is contained within S[start:end].  Optional
+     |      arguments start and end are interpreted as in slice notation.
+     |
+     |      Return -1 on failure.
+     |
+     |  rindex(...)
+     |      S.rindex(sub[, start[, end]]) -> int
+     |
+     |      Return the highest index in S where substring sub is found,
+     |      such that sub is contained within S[start:end].  Optional
+     |      arguments start and end are interpreted as in slice notation.
+     |
+     |      Raises ValueError when the substring is not found.
+     |
+     |  rjust(self, width, fillchar=' ', /)
+     |      Return a right-justified string of length width.
+     |
+     |      Padding is done using the specified fill character (default is a space).
+     |
+     |  rpartition(self, sep, /)
+     |      Partition the string into three parts using the given separator.
+     |
+     |      This will search for the separator in the string, starting at the end. If
+     |      the separator is found, returns a 3-tuple containing the part before the
+     |      separator, the separator itself, and the part after it.
+     |
+     |      If the separator is not found, returns a 3-tuple containing two empty strings
+     |      and the original string.
+     |
+     |  rsplit(self, /, sep=None, maxsplit=-1)
+     |      Return a list of the substrings in the string, using sep as the separator string.
+     |
+     |        sep
+     |          The separator used to split the string.
+     |
+     |          When set to None (the default value), will split on any whitespace
+     |          character (including \n \r \t \f and spaces) and will discard
+     |          empty strings from the result.
+     |        maxsplit
+     |          Maximum number of splits.
+     |          -1 (the default value) means no limit.
+     |
+     |      Splitting starts at the end of the string and works to the front.
+     |
+     |  rstrip(self, chars=None, /)
+     |      Return a copy of the string with trailing whitespace removed.
+     |
+     |      If chars is given and not None, remove characters in chars instead.
+     |
+     |  split(self, /, sep=None, maxsplit=-1)
+     |      Return a list of the substrings in the string, using sep as the separator string.
+     |
+     |        sep
+     |          The separator used to split the string.
+     |
+     |          When set to None (the default value), will split on any whitespace
+     |          character (including \n \r \t \f and spaces) and will discard
+     |          empty strings from the result.
+     |        maxsplit
+     |          Maximum number of splits.
+     |          -1 (the default value) means no limit.
+     |
+     |      Splitting starts at the front of the string and works to the end.
+     |
+     |      Note, str.split() is mainly useful for data that has been intentionally
+     |      delimited.  With natural text that includes punctuation, consider using
+     |      the regular expression module.
+     |
+     |  splitlines(self, /, keepends=False)
+     |      Return a list of the lines in the string, breaking at line boundaries.
+     |
+     |      Line breaks are not included in the resulting list unless keepends is given and
+     |      true.
+     |
+     |  startswith(...)
+     |      S.startswith(prefix[, start[, end]]) -> bool
+     |
+     |      Return True if S starts with the specified prefix, False otherwise.
+     |      With optional start, test S beginning at that position.
+     |      With optional end, stop comparing S at that position.
+     |      prefix can also be a tuple of strings to try.
+     |
+     |  strip(self, chars=None, /)
+     |      Return a copy of the string with leading and trailing whitespace removed.
+     |
+     |      If chars is given and not None, remove characters in chars instead.
+     |
+     |  swapcase(self, /)
+     |      Convert uppercase characters to lowercase and lowercase characters to uppercase.
+     |
+     |  title(self, /)
+     |      Return a version of the string where each word is titlecased.
+     |
+     |      More specifically, words start with uppercased characters and all remaining
+     |      cased characters have lower case.
+     |
+     |  translate(self, table, /)
+     |      Replace each character in the string using the given translation table.
+     |
+     |        table
+     |          Translation table, which must be a mapping of Unicode ordinals to
+     |          Unicode ordinals, strings, or None.
+     |
+     |      The table must implement lookup/indexing via __getitem__, for instance a
+     |      dictionary or list.  If this operation raises LookupError, the character is
+     |      left untouched.  Characters mapped to None are deleted.
+     |
+     |  upper(self, /)
+     |      Return a copy of the string converted to uppercase.
+     |
+     |  zfill(self, width, /)
+     |      Pad a numeric string with zeros on the left, to fill a field of the given width.
+     |
+     |      The string is never truncated.
+     |
+     |  ----------------------------------------------------------------------
+     |  Static methods inherited from builtins.str:
+     |
+     |  maketrans(...)
+     |      Return a translation table usable for str.translate().
+     |
+     |      If there is only one argument, it must be a dictionary mapping Unicode
+     |      ordinals (integers) or characters to Unicode ordinals, strings or None.
+     |      Character keys will be then converted to ordinals.
+     |      If there are two arguments, they must be strings of equal length, and
+     |      in the resulting dictionary, each character in x will be mapped to the
+     |      character at the same position in y. If there is a third argument, it
+     |      must be a string, whose characters will be mapped to None in the result.
+     |
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from enum.Enum:
+     |
+     |  __dir__(self)
+     |      Returns public methods and other interesting attributes.
+     |
+     |  __init__(self, *args, **kwds)
+     |      Initialize self.  See help(type(self)) for accurate signature.
+     |
+     |  __reduce_ex__(self, proto)
+     |      Helper for pickle.
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from enum.Enum:
+     |
+     |  name
+     |      The name of the Enum member.
+     |
+     |  value
+     |      The value of the Enum member.
+     |
+     |  ----------------------------------------------------------------------
+     |  Readonly properties inherited from enum.EnumType:
+     |
+     |  __members__
+     |      Returns a mapping of member name->value.
+     |
+     |      This mapping lists all enum members, including aliases. Note that this
+     |      is a read-only view of the internal mapping.
+
+    class Execution(typing.Protocol)
+     |  Execution(*args, **kwargs)
+     |
+     |  Interface for per-room execution. Pluggable.
+     |
+     |  Implementations handle what happens INSIDE a room.
+     |  The default ExecutionContext uses context accumulation.
+     |  Custom implementations (e.g., Letta) can use persistent agents.
+     |
+     |  .. versionchanged:: 0.2.0
+     |      Breaking change: The ``stop()`` method signature changed from
+     |      ``async def stop() -> None`` to ``async def stop(timeout=None) -> bool``.
+     |
+     |  Migration Guide:
+     |      If you have a custom Execution implementation, update the stop() method:
+     |
+     |      Before::
+     |
+     |          async def stop(self) -> None:
+     |              # cleanup logic
+     |              pass
+     |
+     |      After::
+     |
+     |          async def stop(self, timeout: float | None = None) -> bool:
+     |              # cleanup logic (timeout can be ignored if not needed)
+     |              return True  # Return True for graceful, False if interrupted
+     |
+     |  Method resolution order:
+     |      Execution
+     |      typing.Protocol
+     |      typing.Generic
+     |      builtins.object
+     |
+     |  Methods defined here:
+     |
+     |  __init__ = _no_init_or_replace_init(self, *args, **kwargs) from typing
+     |
+     |  inject_system_message(self, message: 'str') -> 'None'
+     |      Queue a system message for injection on next processing.
+     |
+     |      Used by ContactEventHandler to broadcast contact changes.
+     |
+     |  async on_event(self, event: 'PlatformEvent') -> 'None'
+     |      Handle a platform event for this room.
+     |
+     |  async request_resync(self) -> 'None'
+     |      Signal the process loop to re-poll /next immediately.
+     |
+     |      .. versionchanged:: 0.2.0
+     |          Custom ``Execution`` implementations should add ``request_resync()``.
+     |          ``AgentRuntime`` falls back safely for legacy implementations that do
+     |          not provide it, but typed protocol conformance now includes this method.
+     |
+     |      Called after WebSocket reconnect to catch messages that arrived while
+     |      the socket was down. Custom implementations may provide a no-op.
+     |
+     |  async start(self) -> 'None'
+     |      Start the execution context.
+     |
+     |  async stop(self, timeout: 'float | None' = None) -> 'bool'
+     |      Stop the execution context.
+     |
+     |      Args:
+     |          timeout: Optional seconds to wait for graceful shutdown.
+     |                   None means stop immediately.
+     |
+     |      Returns:
+     |          True if stopped gracefully, False if cancelled mid-processing.
+     |
+     |  ----------------------------------------------------------------------
+     |  Class methods defined here:
+     |
+     |  __subclasshook__ = _proto_hook(other) from typing
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |
+     |  __dict__
+     |      dictionary for instance variables
+     |
+     |  __weakref__
+     |      list of weak references to the object
+     |
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes defined here:
+     |
+     |  __abstractmethods__ = frozenset()
+     |
+     |  __annotations__ = {'room_id': 'str'}
+     |
+     |  __non_callable_proto_members__ = {'room_id'}
+     |
+     |  __parameters__ = ()
+     |
+     |  __protocol_attrs__ = {'inject_system_message', 'on_event', 'request_re...
+     |
+     |  ----------------------------------------------------------------------
+     |  Class methods inherited from typing.Protocol:
+     |
+     |  __init_subclass__(*args, **kwargs)
+     |      Function to initialize subclasses.
+     |
+     |  ----------------------------------------------------------------------
+     |  Class methods inherited from typing.Generic:
+     |
+     |  __class_getitem__(...)
+     |      Parameterizes a generic class.
+     |
+     |      At least, parameterizing a generic class is the *main* thing this
+     |      method does. For example, for some generic class `Foo`, this is called
+     |      when we do `Foo[int]` - there, with `cls=Foo` and `params=int`.
+     |
+     |      However, note that this method is also called when defining generic
+     |      classes in the first place with `class Foo[T]: ...`.
+
+    class ExecutionContext(builtins.object)
+     |  ExecutionContext(room_id: 'str', link: "'BandLink'", on_execute: 'ExecutionHandler', config: 'SessionConfig | None' = None, agent_id: 'str | None' = None, on_participant_added: 'ParticipantAddedCallback | None' = None, on_participant_removed: 'ParticipantRemovedCallback | None' = None, *, hub_room_id: 'str | None' = None)
+     |
+     |  Default execution: context accumulation model.
+     |
+     |  Extracted from AgentSession.
+     |
+     |  - Accumulates inputs (history, participants)
+     |  - Queues messages
+     |  - Feeds agent when instantiated
+     |  - Agent disappears after execution
+     |
+     |  Example:
+     |      async def on_execute(ctx: ExecutionContext, event: PlatformEvent):
+     |          if isinstance(event, MessageEvent):
+     |              tools = AgentTools.from_context(ctx)
+     |              history = ctx.get_history_for_llm()
+     |              # Run LLM with context and tools...
+     |
+     |      ctx = ExecutionContext(room_id, link, on_execute)
+     |      await ctx.start()
+     |
+     |  Methods defined here:
+     |
+     |  __init__(self, room_id: 'str', link: "'BandLink'", on_execute: 'ExecutionHandler', config: 'SessionConfig | None' = None, agent_id: 'str | None' = None, on_participant_added: 'ParticipantAddedCallback | None' = None, on_participant_removed: 'ParticipantRemovedCallback | None' = None, *, hub_room_id: 'str | None' = None)
+     |      Initialize execution context for a specific room.
+     |
+     |      Args:
+     |          room_id: The room this context manages
+     |          link: BandLink for REST API calls
+     |          on_execute: Callback for handling events
+     |          config: Optional session configuration
+     |          agent_id: Agent ID for filtering self-messages
+     |          on_participant_added: Optional callback for participant_added events
+     |          on_participant_removed: Optional callback for participant_removed events
+     |          hub_room_id: Optional hub-room ID. Forwarded to AgentTools so the
+     |              schema methods can auto-enable contact tools when this context
+     |              belongs to the hub room.
+     |
+     |  add_participant(self, participant: 'dict') -> 'bool'
+     |      Add participant (from WebSocket event).
+     |
+     |      Returns:
+     |          True if added, False if duplicate
+     |
+     |  build_context(self) -> 'ConversationContext'
+     |      Build context dict for LLM.
+     |
+     |      Returns cached context or empty context if not hydrated.
+     |
+     |  build_participants_message(self) -> 'str'
+     |      Build a system message with current participant list for LLM.
+     |
+     |  async get_context(self, force_refresh: 'bool' = False) -> 'ConversationContext'
+     |      Get conversation context (lazy, cached).
+     |
+     |      Args:
+     |          force_refresh: Force refresh from API even if cached
+     |
+     |  get_history_for_llm(self, exclude_message_id: 'str | None' = None) -> 'list[dict[str, Any]]'
+     |      Get conversation history formatted for LLM injection.
+     |
+     |      Returns list of dicts with:
+     |      - role: "assistant" or "user"
+     |      - content: message content
+     |      - sender_name: original sender name
+     |
+     |      Args:
+     |          exclude_message_id: Message ID to exclude (usually current message)
+     |
+     |      Returns:
+     |          List of message dicts ready for LLM formatting.
+     |
+     |  get_pending_system_messages(self) -> 'list[str]'
+     |      Get and clear pending system messages.
+     |
+     |      Returns:
+     |          List of pending messages (cleared after call)
+     |
+     |  async hydrate(self) -> 'None'
+     |      Hydrate conversation context for this room.
+     |
+     |      Called lazily on first event to load participant list and
+     |      (optionally) conversation history.
+     |
+     |      Participants are always loaded (lightweight, universally needed).
+     |      If enable_context_hydration is False, skips history loading
+     |      (useful for agents that manage their own state like Letta).
+     |
+     |  inject_system_message(self, message: 'str') -> 'None'
+     |      Queue a system message for injection on next processing.
+     |
+     |      Used by ContactEventHandler to broadcast contact changes
+     |      into all active sessions.
+     |
+     |      Args:
+     |          message: System message to inject
+     |
+     |  async load_participants(self) -> 'list[dict[str, Any]]'
+     |      Load participants from API.
+     |
+     |  mark_llm_initialized(self) -> 'None'
+     |      Mark that system prompt has been sent to LLM.
+     |
+     |  mark_participants_sent(self) -> 'None'
+     |      Mark current participants as sent to LLM.
+     |
+     |  async on_event(self, event: 'PlatformEvent') -> 'None'
+     |      Handle a platform event.
+     |
+     |      Called by RoomPresence/AgentRuntime when an event arrives.
+     |      Tracks first WebSocket message ID for crash recovery sync.
+     |      Reconnect events trigger a fresh /next synchronization immediately.
+     |
+     |  participants_changed(self) -> 'bool'
+     |      Check if participants changed since last mark_participants_sent().
+     |
+     |  remove_participant(self, participant_id: 'str') -> 'bool'
+     |      Remove participant (from WebSocket event).
+     |
+     |      Returns:
+     |          True if removed, False if not found
+     |
+     |  async request_resync(self) -> 'None'
+     |      Signal the process loop to re-poll /next immediately.
+     |
+     |      Pushes a sentinel into the event queue so the Phase 2 loop wakes up
+     |      and runs a /next catch-up without waiting for the idle timeout. Called
+     |      by AgentRuntime after WebSocket reconnect.
+     |
+     |  async start(self) -> 'None'
+     |      Start background processing for this room.
+     |
+     |      Creates an asyncio task that processes events from the queue.
+     |
+     |  async stop(self, timeout: 'float | None' = None) -> 'bool'
+     |      Stop processing with optional graceful timeout.
+     |
+     |      If timeout is provided, waits up to that many seconds for current
+     |      message processing to complete before cancelling. If timeout is None,
+     |      cancels immediately via task.cancel().
+     |
+     |      Args:
+     |          timeout: Optional seconds to wait for current processing to complete.
+     |                   None means cancel immediately.
+     |
+     |      Returns:
+     |          True if stopped gracefully (processing completed or was idle),
+     |          False if had to cancel mid-processing after timeout.
+     |
+     |  ----------------------------------------------------------------------
+     |  Readonly properties defined here:
+     |
+     |  is_llm_initialized
+     |      Check if LLM has been initialized with system prompt.
+     |
+     |  is_processing
+     |      Check if context is currently processing an event.
+     |
+     |  is_running
+     |      Check if context is running (task exists and not done).
+     |
+     |  participants
+     |      Get current participants list (copy).
+     |
+     |  thread_id
+     |      LangGraph thread_id = room_id.
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |
+     |  __dict__
+     |      dictionary for instance variables
+     |
+     |  __weakref__
+     |      list of weak references to the object
+
+    class GracefulShutdown(builtins.object)
+     |  GracefulShutdown(agent: "'Agent'", timeout: 'float' = 30.0, on_signal: 'Callable[[int], None] | None' = None)
+     |
+     |  Manages graceful shutdown of a Band agent via signal handling.
+     |
+     |  Catches SIGINT (Ctrl+C), SIGTERM, and SIGHUP signals and triggers a graceful
+     |  shutdown of the agent, allowing current message processing to complete
+     |  within a configurable timeout.
+     |
+     |  Warning:
+     |      The shutdown task created by signal handlers is NOT awaited. This means
+     |      if the process exits immediately after receiving a signal (e.g., due to
+     |      SIGKILL or rapid termination), the graceful shutdown may not complete.
+     |      For guaranteed shutdown completion, use one of these patterns:
+     |
+     |      1. Context manager (recommended):
+     |          async with GracefulShutdown(agent, timeout=30.0):
+     |              await agent.run()
+     |
+     |      2. Manual await:
+     |          await agent.stop(timeout=30.0)
+     |
+     |  Note:
+     |      Signal handlers using asyncio's add_signal_handler() only work on
+     |      Unix systems (Linux, macOS). On Windows, use KeyboardInterrupt
+     |      handling instead (asyncio.run() automatically converts SIGINT to
+     |      KeyboardInterrupt):
+     |
+     |          try:
+     |              await agent.run()
+     |          except KeyboardInterrupt:
+     |              await agent.stop(timeout=30.0)
+     |
+     |  Note:
+     |      SIGHUP is treated as a shutdown signal, NOT a configuration reload
+     |      signal. If your deployment expects SIGHUP for config reload, you
+     |      should not use this handler and implement custom signal handling.
+     |
+     |  Note:
+     |      Multiple signals during shutdown: Once a shutdown is initiated, subsequent
+     |      signals are ignored. The shutdown will complete within the configured timeout.
+     |      If you need to force an immediate exit, send SIGKILL (kill -9) instead.
+     |
+     |  Example (recommended pattern):
+     |      agent = Agent.create(...)
+     |
+     |      async def main():
+     |          shutdown = GracefulShutdown(agent, timeout=30.0)
+     |          shutdown.register_signals()
+     |
+     |          try:
+     |              await agent.run()
+     |          except asyncio.CancelledError:
+     |              pass  # Normal shutdown
+     |
+     |      asyncio.run(main())
+     |
+     |  Example (context manager pattern):
+     |      async def main():
+     |          agent = Agent.create(...)
+     |
+     |          async with GracefulShutdown(agent, timeout=30.0):
+     |              await agent.run()
+     |
+     |  Example (manual signal handling):
+     |      import logging
+     |      logger = logging.getLogger(__name__)
+     |
+     |      agent = Agent.create(...)
+     |
+     |      async def main():
+     |          shutdown = GracefulShutdown(agent, timeout=30.0)
+     |
+     |          # Register custom signal behavior
+     |          def on_signal(signum):
+     |              logger.info("Received signal %s, shutting down...", signum)
+     |
+     |          shutdown.on_signal = on_signal
+     |          shutdown.register_signals()
+     |
+     |          await agent.run()
+     |
+     |  Attributes:
+     |      agent: The Agent instance to shut down.
+     |      timeout: Seconds to wait for graceful shutdown.
+     |      on_signal: Optional callback invoked when signal is received.
+     |
+     |  Methods defined here:
+     |
+     |  async __aenter__(self) -> "'GracefulShutdown'"
+     |      Enter async context - register signal handlers.
+     |
+     |  async __aexit__(self, exc_type: 'type[BaseException] | None', exc_val: 'BaseException | None', exc_tb: 'TracebackType | None') -> 'None'
+     |      Exit async context - unregister signal handlers.
+     |
+     |  __init__(self, agent: "'Agent'", timeout: 'float' = 30.0, on_signal: 'Callable[[int], None] | None' = None)
+     |      Initialize graceful shutdown handler.
+     |
+     |      Args:
+     |          agent: The Agent instance to manage.
+     |          timeout: Seconds to wait for processing to complete before
+     |                   forcing shutdown. Default is 30 seconds.
+     |          on_signal: Optional callback invoked when a shutdown signal
+     |                     is received. Receives the signal number.
+     |
+     |  register_signals(self) -> 'None'
+     |      Register signal handlers for SIGINT and SIGTERM.
+     |
+     |      On Unix systems, also handles SIGHUP (as shutdown, not reload).
+     |
+     |      Call this before starting the agent. Signals will trigger
+     |      a graceful shutdown of the agent.
+     |
+     |  unregister_signals(self) -> 'None'
+     |      Remove signal handlers and restore original handlers.
+     |
+     |      Called automatically when using the context manager pattern.
+     |
+     |  async wait_for_shutdown(self) -> 'None'
+     |      Wait until a shutdown signal is received.
+     |
+     |      Useful for custom run loops:
+     |          shutdown = GracefulShutdown(agent)
+     |          shutdown.register_signals()
+     |          await agent.start()
+     |          await shutdown.wait_for_shutdown()
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |
+     |  __dict__
+     |      dictionary for instance variables
+     |
+     |  __weakref__
+     |      list of weak references to the object
+
+    class MessageRetryTracker(builtins.object)
+     |  MessageRetryTracker(max_retries: 'int' = 1, room_id: 'str' = '')
+     |
+     |  Tracks message processing attempts and permanent failures.
+     |
+     |  Used by ExecutionContext to:
+     |  - Prevent infinite retry loops
+     |  - Skip permanently failed messages
+     |
+     |  Methods defined here:
+     |
+     |  __init__(self, max_retries: 'int' = 1, room_id: 'str' = '')
+     |      Initialize self.  See help(type(self)) for accurate signature.
+     |
+     |  is_permanently_failed(self, msg_id: 'str') -> 'bool'
+     |      Check if message has exceeded max retries.
+     |
+     |  mark_permanently_failed(self, msg_id: 'str') -> 'None'
+     |      Explicitly mark message as permanently failed.
+     |
+     |  mark_success(self, msg_id: 'str') -> 'None'
+     |      Clear tracking for successfully processed message.
+     |
+     |  record_attempt(self, msg_id: 'str') -> 'tuple[int, bool]'
+     |      Record processing attempt.
+     |
+     |      Returns:
+     |          Tuple of (attempt_count, exceeded_max_retries)
+     |
+     |  ----------------------------------------------------------------------
+     |  Readonly properties defined here:
+     |
+     |  max_retries
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |
+     |  __dict__
+     |      dictionary for instance variables
+     |
+     |  __weakref__
+     |      list of weak references to the object
+
+    class ParticipantTracker(builtins.object)
+     |  ParticipantTracker(room_id: 'str' = '')
+     |
+     |  Tracks room participants and detects changes.
+     |
+     |  Used by ExecutionContext to:
+     |  - Track participants via WebSocket events
+     |  - Detect when LLM needs to be notified of changes
+     |
+     |  Methods defined here:
+     |
+     |  __init__(self, room_id: 'str' = '')
+     |      Initialize self.  See help(type(self)) for accurate signature.
+     |
+     |  add(self, participant: 'dict[str, Any]') -> 'bool'
+     |      Add participant (from WebSocket event).
+     |
+     |      Returns:
+     |          True if added, False if duplicate
+     |
+     |  changed(self) -> 'bool'
+     |      Check if participants changed since last mark_sent().
+     |
+     |  mark_sent(self) -> 'None'
+     |      Mark current state as sent to LLM.
+     |
+     |  remove(self, participant_id: 'str') -> 'bool'
+     |      Remove participant (from WebSocket event).
+     |
+     |      Returns:
+     |          True if removed, False if not found
+     |
+     |  set_loaded(self, participants: 'list[dict[str, Any]]') -> 'None'
+     |      Set participants from API load.
+     |
+     |  ----------------------------------------------------------------------
+     |  Readonly properties defined here:
+     |
+     |  is_loaded
+     |      Check if participants have been loaded from API.
+     |
+     |  participants
+     |      Get current participants (copy).
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |
+     |  __dict__
+     |      dictionary for instance variables
+     |
+     |  __weakref__
+     |      list of weak references to the object
+
+    class PlatformMessage(builtins.object)
+     |  PlatformMessage(id: 'str', room_id: 'str', content: 'str', sender_id: 'str', sender_type: 'str', sender_name: 'str | None', message_type: 'str', metadata: 'dict[str, Any]', created_at: 'datetime') -> None
+     |
+     |  Message from platform (normalized for adapters).
+     |
+     |  This is the message format passed to MessageHandlers.
+     |
+     |  Methods defined here:
+     |
+     |  __eq__(self, other)
+     |      Return self==value.
+     |
+     |  __init__(self, id: 'str', room_id: 'str', content: 'str', sender_id: 'str', sender_type: 'str', sender_name: 'str | None', message_type: 'str', metadata: 'dict[str, Any]', created_at: 'datetime') -> None
+     |      Initialize self.  See help(type(self)) for accurate signature.
+     |
+     |  __repr__(self)
+     |      Return repr(self).
+     |
+     |  format_for_llm(self) -> 'str'
+     |      Format message with sender prefix for LLM consumption.
+     |
+     |      Returns string in format: [SENDER_NAME]: message content
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |
+     |  __dict__
+     |      dictionary for instance variables
+     |
+     |  __weakref__
+     |      list of weak references to the object
+     |
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes defined here:
+     |
+     |  __annotations__ = {'content': 'str', 'created_at': 'datetime', 'id': '...
+     |
+     |  __dataclass_fields__ = {'content': Field(name='content',type='str',def...
+     |
+     |  __dataclass_params__ = _DataclassParams(init=True,repr=True,eq=True,or...
+     |
+     |  __hash__ = None
+     |
+     |  __match_args__ = ('id', 'room_id', 'content', 'sender_id', 'sender_typ...
+
+    class RoomPresence(builtins.object)
+     |  RoomPresence(link: 'BandLink', room_filter: 'Callable[[dict], bool] | None' = None, auto_subscribe_existing: 'bool' = True)
+     |
+     |  Manages agent's presence across rooms.
+     |
+     |  Cross-room only. Does NOT handle what happens inside rooms.
+     |  That's the job of Execution implementations.
+     |
+     |  Extracted from BandAgent room lifecycle:
+     |  - _on_room_added() -> on_room_joined callback
+     |  - _on_room_removed() -> on_room_left callback
+     |  - _subscribe_to_existing_rooms() -> start() auto-subscription
+     |
+     |  Example:
+     |      import logging
+     |      logger = logging.getLogger(__name__)
+     |
+     |      link = BandLink(agent_id, api_key, ...)
+     |      presence = RoomPresence(link)
+     |
+     |      async def on_joined(room_id: str, payload: dict):
+     |          logger.info("Joined room %s", room_id)
+     |
+     |      async def on_event(room_id: str, event: PlatformEvent):
+     |          if isinstance(event, MessageEvent):
+     |              logger.info("Message in %s: %s", room_id, event.payload.content)
+     |
+     |      presence.on_room_joined = on_joined
+     |      presence.on_room_event = on_event
+     |
+     |      await presence.start()
+     |      # Presence now consumes events via async iterator internally
+     |      await link.run_forever()
+     |
+     |  Methods defined here:
+     |
+     |  __init__(self, link: 'BandLink', room_filter: 'Callable[[dict], bool] | None' = None, auto_subscribe_existing: 'bool' = True)
+     |      Initialize RoomPresence.
+     |
+     |      Args:
+     |          link: BandLink for WebSocket events
+     |          room_filter: Optional filter to decide which rooms to join
+     |          auto_subscribe_existing: Subscribe to existing rooms on start
+     |
+     |  async start(self) -> 'None'
+     |      Start presence management.
+     |
+     |      1. Connect link if not connected
+     |      2. Subscribe to agent room events
+     |      3. Subscribe to existing rooms (if configured)
+     |      4. Spawn task to consume events from link
+     |
+     |  async stop(self) -> 'None'
+     |      Stop presence management.
+     |
+     |      Cancels event consumer, unsubscribes from all rooms and clears state.
+     |      Does NOT disconnect the link (caller may want to reuse it).
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |
+     |  __dict__
+     |      dictionary for instance variables
+     |
+     |  __weakref__
+     |      list of weak references to the object
+
+    class SessionConfig(builtins.object)
+     |  SessionConfig(enable_context_cache: 'bool' = True, context_cache_ttl_seconds: 'int' = 300, max_context_messages: 'int' = 100, max_message_retries: 'int' = 1, enable_context_hydration: 'bool' = True, idle_resync_seconds: 'float' = 60.0) -> None
+     |
+     |  Configuration for execution context.
+     |
+     |  Methods defined here:
+     |
+     |  __eq__(self, other)
+     |      Return self==value.
+     |
+     |  __init__(self, enable_context_cache: 'bool' = True, context_cache_ttl_seconds: 'int' = 300, max_context_messages: 'int' = 100, max_message_retries: 'int' = 1, enable_context_hydration: 'bool' = True, idle_resync_seconds: 'float' = 60.0) -> None
+     |      Initialize self.  See help(type(self)) for accurate signature.
+     |
+     |  __post_init__(self) -> 'None'
+     |
+     |  __repr__(self)
+     |      Return repr(self).
+     |
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |
+     |  __dict__
+     |      dictionary for instance variables
+     |
+     |  __weakref__
+     |      list of weak references to the object
+     |
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes defined here:
+     |
+     |  __annotations__ = {'context_cache_ttl_seconds': 'int', 'enable_context...
+     |
+     |  __dataclass_fields__ = {'context_cache_ttl_seconds': Field(name='conte...
+     |
+     |  __dataclass_params__ = _DataclassParams(init=True,repr=True,eq=True,or...
+     |
+     |  __hash__ = None
+     |
+     |  __match_args__ = ('enable_context_cache', 'context_cache_ttl_seconds',...
+     |
+     |  context_cache_ttl_seconds = 300
+     |
+     |  enable_context_cache = True
+     |
+     |  enable_context_hydration = True
+     |
+     |  idle_resync_seconds = 60.0
+     |
+     |  max_context_messages = 100
+     |
+     |  max_message_retries = 1
+
+FUNCTIONS
+    build_participants_message(participants: 'list[dict]') -> 'str'
+        Build participant list message for LLM context.
+
+        Includes instruction to use band_send_message with handles or names.
+
+        Args:
+            participants: List of participant dicts with id, name, type, handle
+
+        Returns:
+            Formatted string for LLM system message
+
+    format_history_for_llm(messages: 'list[dict]', exclude_id: 'str | None' = None, participants: 'list[dict] | None' = None) -> 'list[dict]'
+        Format platform message history for LLM injection.
+
+        Args:
+            messages: List of platform message dicts
+            exclude_id: Message ID to exclude (usually current message)
+            participants: Optional list of participants for UUID mention replacement
+
+        Returns:
+            List of formatted message dicts
+
+    format_message_for_llm(msg: 'dict', participants: 'list[dict] | None' = None) -> 'dict'
+        Map platform message to LLM format.
+
+        Args:
+            msg: Platform message dict with sender_type, content, sender_name
+            participants: Optional list of participants for UUID mention replacement
+
+        Returns:
+            Dict with role, content, sender_name, sender_type, message_type, metadata
+
+    mcp_tool_names(names: 'frozenset[str]') -> 'list[str]'
+        Convert base tool names to MCP-prefixed names for Claude SDK.
+
+        Returns a sorted list for deterministic ordering across runs.
+
+    render_system_prompt(agent_name: 'str' = 'Agent', agent_description: 'str' = 'An AI assistant', custom_section: 'str' = '', template: 'str' = 'default', include_base_instructions: 'bool' = True, features: 'AdapterFeatures | None' = None) -> 'str'
+        Render system prompt: agent identity + custom section + optionally base instructions.
+
+        Args:
+            agent_name: Agent's name
+            agent_description: Agent's description
+            custom_section: User's custom instructions
+            template: Template name (default: "default")
+            include_base_instructions: Whether to include SDK's BASE_INSTRUCTIONS.
+                                       Set False if providing fully custom behavior.
+            features: AdapterFeatures controlling which capability sections to include.
+
+        Returns:
+            Rendered system prompt
+
+    async run_with_graceful_shutdown(agent: "'Agent'", timeout: 'float' = 30.0, on_signal: 'Callable[[int], None] | None' = None) -> 'None'
+        Run an agent with graceful shutdown signal handling.
+
+        Convenience function that sets up signal handlers and runs the agent.
+        On SIGINT/SIGTERM, waits for current processing to complete within
+        the timeout before stopping.
+
+        Args:
+            agent: The Agent instance to run.
+            timeout: Seconds to wait for graceful shutdown.
+            on_signal: Optional callback when signal is received.
+
+        Example:
+            agent = Agent.create(...)
+            await run_with_graceful_shutdown(agent, timeout=30.0)
+
+DATA
+    ALL_TOOL_NAMES = frozenset({'band_add_contact', 'band_add_participant'...
+    BASE_TOOL_NAMES = frozenset({'band_add_contact', 'band_add_participant...
+    CHAT_TOOL_NAMES = frozenset({'band_add_participant', 'band_create_chat...
+    CONTACT_TOOL_NAMES = frozenset({'band_add_contact', 'band_list_contact...
+    ExecutionHandler = typing.Callable[[ForwardRef('ExecutionContext'),......
+    MCP_TOOL_PREFIX = 'mcp__band__'
+    MEMORY_TOOL_NAMES = frozenset({'band_archive_memory', 'band_get_memory...
+    PlatformEvent = band.platform.event.MessageEvent | band.platform...ect...
+    TOOL_MODELS = {'band_add_contact': <class 'band.runtime.tools.AddConta...
+    __all__ = ['Agent', 'AdapterFeatures', 'Capability', 'Emit', 'BandErro...
+
+VERSION
+    1.0.0
+
+FILE
+    /opt/anaconda3/lib/python3.12/site-packages/band/__init__.py
+
+
