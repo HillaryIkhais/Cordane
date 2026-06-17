@@ -6,9 +6,10 @@ import { createContext, useContext, ReactNode } from "react";
 const UniversalAuthContext = createContext<any>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const appId = process.env.NEXT_PUBLIC_PRIVY_APP_ID;
+  const rawAppId = process.env.NEXT_PUBLIC_PRIVY_APP_ID || "";
+  const appId = rawAppId.replace(/['"]/g, '').trim();
 
-  if (!appId || appId === "clp0w8x53b05z613xckzmsz85") {
+  if (!appId || appId === "clp0w8x53b05z613xckzmsz85" || appId.length < 15) {
     return (
       <div className="min-h-screen w-full flex flex-col items-center justify-center bg-background text-white/50 space-y-4">
         <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center text-red-500 border border-red-500/20">
