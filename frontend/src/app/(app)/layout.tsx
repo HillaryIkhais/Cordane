@@ -18,9 +18,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   return (
-    <div className="flex h-screen bg-background text-foreground transition-colors duration-500 font-sans overflow-hidden">
-      
-      {/* Sleek, cinematic sidebar using glassmorphism */}
+    <AuthGuard>
+      <div className="flex h-screen bg-background text-foreground transition-colors duration-500 font-sans overflow-hidden">
+        
+        {/* Sleek, cinematic sidebar using glassmorphism */}
       <aside className="w-64 border-r border-white/5 bg-white/[0.02] backdrop-blur-3xl flex flex-col items-start pt-8 pb-6 shadow-[10px_0_30px_-15px_rgba(0,0,0,0.5)] z-20 shrink-0">
         <Link href="/dashboard" className="px-8 flex items-center gap-3 mb-12 group">
           <Logo className="w-8 h-8 group-hover:scale-105 transition-transform" />
