@@ -114,7 +114,7 @@ export default function PlatformPage() {
           <Link href="/dashboard" className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider opacity-60 hover:opacity-100 transition-opacity">
             <ArrowLeft className="w-4 h-4" /> Dashboard
           </Link>
-          <span className="font-serif text-2xl tracking-tight text-[#e07a5f]">Cordane.</span>
+          <span className="font-serif text-2xl tracking-tight text-[#C8853A]">Cordane.</span>
           <div className="flex items-center gap-4">
             <span className="text-xs font-mono uppercase opacity-50"><span className="inline-block w-2 h-2 rounded-full bg-green-500 mr-2 animate-pulse"></span>Mesh Active</span>
           </div>
@@ -134,8 +134,8 @@ export default function PlatformPage() {
 
               {/* Drag and Drop Zone */}
               <div className="border-2 border-dashed border-border rounded-xl p-16 flex flex-col items-center justify-center text-center bg-white/5 hover:bg-white/10 transition-colors cursor-pointer group">
-                <div className="w-16 h-16 rounded-full bg-[#e07a5f]/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                  <Upload className="w-8 h-8 text-[#e07a5f]" />
+                <div className="w-16 h-16 rounded-full bg-[#C8853A]/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                  <Upload className="w-8 h-8 text-[#C8853A]" />
                 </div>
                 <h3 className="font-bold text-lg mb-2">Drag & Drop Contract</h3>
                 <p className="text-sm opacity-60 max-w-xs">Supports PDF, DOCX, and TXT files up to 50MB.</p>
@@ -145,18 +145,18 @@ export default function PlatformPage() {
               <div>
                 <h3 className="text-xs font-bold uppercase tracking-widest opacity-50 mb-4 text-center">Or Trigger Demo Scenario</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <button onClick={() => handleStartReview("A", "APPROVED")} className="p-4 border border-border rounded-lg bg-background/50 hover:border-[#e07a5f]/50 transition-colors text-left flex flex-col gap-2">
+                  <button onClick={() => handleStartReview("A", "APPROVED")} className="p-4 border border-border rounded-lg bg-background/50 hover:border-[#C8853A]/50 transition-colors text-left flex flex-col gap-2">
                     <span className="font-mono text-xs text-green-500">Scenario A</span>
                     <span className="font-bold">Clean Approve</span>
                     <span className="text-xs opacity-60">No risky clauses.</span>
                   </button>
-                  <button onClick={() => handleStartReview("B", "REJECTED")} className="p-4 border border-border rounded-lg bg-background/50 hover:border-[#e07a5f]/50 transition-colors text-left flex flex-col gap-2">
+                  <button onClick={() => handleStartReview("B", "REJECTED")} className="p-4 border border-border rounded-lg bg-background/50 hover:border-[#C8853A]/50 transition-colors text-left flex flex-col gap-2">
                     <span className="font-mono text-xs text-red-500">Scenario B</span>
                     <span className="font-bold">Clear Reject</span>
                     <span className="text-xs opacity-60">Adversarial trigger.</span>
                   </button>
-                  <button onClick={() => handleStartReview("C", "ESCALATED")} className="p-4 border border-border rounded-lg bg-[#e07a5f]/10 border-[#e07a5f]/30 transition-colors text-left flex flex-col gap-2 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 bg-[#e07a5f] text-white text-[9px] font-bold px-2 py-0.5 rounded-bl-lg uppercase tracking-wider">Demo Default</div>
+                  <button onClick={() => handleStartReview("C", "ESCALATED")} className="p-4 border border-border rounded-lg bg-[#C8853A]/10 border-[#C8853A]/30 transition-colors text-left flex flex-col gap-2 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 bg-[#C8853A] text-white text-[9px] font-bold px-2 py-0.5 rounded-bl-lg uppercase tracking-wider">Demo Default</div>
                     <span className="font-mono text-xs text-amber-500">Scenario C</span>
                     <span className="font-bold">Ambiguous</span>
                     <span className="text-xs opacity-60">Requires negotiation.</span>
@@ -185,10 +185,10 @@ export default function PlatformPage() {
                 {AGENTS.map((agent) => {
                   const isActive = currentMessage?.role?.toLowerCase() === agent.id.toLowerCase() || currentMessage?.role?.toLowerCase() === agent.name.toLowerCase();
                   return (
-                    <div key={agent.id} className={`p-4 rounded-lg border transition-all duration-300 ${isActive ? 'bg-background border-[#e07a5f] shadow-[0_0_20px_rgba(224,122,95,0.15)]' : 'bg-background/40 border-border opacity-70'}`}>
+                    <div key={agent.id} className={`p-4 rounded-lg border transition-all duration-300 ${isActive ? 'bg-background border-[#C8853A] shadow-[0_0_20px_rgba(224,122,95,0.15)]' : 'bg-background/40 border-border opacity-70'}`}>
                       <div className="flex justify-between items-start mb-2">
                         <span className="font-serif text-lg">{agent.name}</span>
-                        {isActive && <span className="w-2 h-2 rounded-full bg-[#e07a5f] animate-pulse"></span>}
+                        {isActive && <span className="w-2 h-2 rounded-full bg-[#C8853A] animate-pulse"></span>}
                       </div>
                       <span className="font-mono text-[10px] uppercase opacity-60">{agent.role}</span>
                     </div>
@@ -211,7 +211,7 @@ export default function PlatformPage() {
                           animate={{ opacity: isLatest ? 1 : 0.4, y: 0 }}
                           className="flex gap-4 items-start"
                         >
-                          <div className={`font-mono text-[10px] font-bold pt-1 w-14 shrink-0 ${isLatest ? 'text-[#e07a5f]' : 'opacity-50'}`}>
+                          <div className={`font-mono text-[10px] font-bold pt-1 w-14 shrink-0 ${isLatest ? 'text-[#C8853A]' : 'opacity-50'}`}>
                             {roleName.substring(0, 6)}
                           </div>
                           <div className={`font-sans text-sm leading-relaxed ${msg.content.includes('FLAG') || msg.content.includes('RISK') ? 'text-amber-500' : ''}`}>
@@ -259,7 +259,7 @@ export default function PlatformPage() {
                   </div>
                   <div className="p-6 grid grid-cols-2 gap-8 text-sm">
                      <div>
-                        <h4 className="font-bold text-[#e07a5f] mb-2 uppercase text-xs tracking-wider">Internal Constraint</h4>
+                        <h4 className="font-bold text-[#C8853A] mb-2 uppercase text-xs tracking-wider">Internal Constraint</h4>
                         <pre className="font-mono text-xs opacity-80 whitespace-pre-wrap">{backendVerdict?.contested_standard || "Strict Liability Limits"}</pre>
                      </div>
                      <div>
@@ -288,7 +288,7 @@ export default function PlatformPage() {
                   </button>
                 )}
 
-                <button onClick={() => setRoomState("UPLOAD")} className="px-8 py-4 bg-transparent text-[#e07a5f] font-bold text-sm uppercase tracking-wider rounded-lg hover:underline flex items-center justify-center gap-2">
+                <button onClick={() => setRoomState("UPLOAD")} className="px-8 py-4 bg-transparent text-[#C8853A] font-bold text-sm uppercase tracking-wider rounded-lg hover:underline flex items-center justify-center gap-2">
                   <RotateCcw className="w-4 h-4" /> Start New Review
                 </button>
               </div>
