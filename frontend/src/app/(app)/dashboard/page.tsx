@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, CheckCircle2, Clock, AlertTriangle, XCircle, Plus } from "lucide-react";
+import { ArrowRight, CheckCircle2, Clock, AlertTriangle, XCircle, Plus, FileText } from "lucide-react";
 import { motion } from "framer-motion";
 
 const RECENT_VERDICTS = [
@@ -13,160 +13,139 @@ const RECENT_VERDICTS = [
 
 export default function DashboardPage() {
   return (
-    <div className="min-h-screen bg-background flex font-sans text-foreground">
+    <div className="max-w-5xl mx-auto p-6 md:p-12 flex flex-col gap-12 relative z-10">
       
-      {/* LEFT SIDEBAR */}
-      <aside className="w-64 border-r border-border bg-background/50 backdrop-blur-md flex flex-col justify-between hidden md:flex">
-        <div>
-          <div className="p-8">
-            <Link href="/" className="font-serif text-2xl tracking-tight text-[#e07a5f]">Cordane.</Link>
+      <header className="flex justify-between items-end md:hidden mb-8">
+        <Link href="/" className="font-serif text-2xl tracking-tight text-foreground/90">Cordane.</Link>
+        <Link href="/platform" className="text-[#cc8b45] text-sm font-bold uppercase tracking-wider">New Review &rarr;</Link>
+      </header>
+
+      {/* ZONE 1: ATTENTION BANNER */}
+      <motion.div 
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-amber-500/10 border border-amber-500/20 backdrop-blur-md rounded-xl p-6 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-[0_0_30px_-10px_rgba(204,139,69,0.2)]"
+      >
+        <div className="flex items-center gap-4">
+          <div className="p-3 bg-amber-500/20 rounded-full">
+            <AlertTriangle className="w-6 h-6 text-amber-500" />
           </div>
-          <nav className="flex flex-col gap-2 px-4">
-            <Link href="/dashboard" className="px-4 py-2 bg-white/5 rounded-md text-sm font-medium border border-white/10">
-              Dashboard
-            </Link>
-            <Link href="/reviews" className="px-4 py-2 text-sm font-medium opacity-60 hover:opacity-100 transition-opacity">
-              Reviews
-            </Link>
-            <Link href="/escalations" className="px-4 py-2 text-sm font-medium opacity-60 hover:opacity-100 transition-opacity flex justify-between items-center">
-              Escalations
-              <span className="bg-[#e07a5f] text-white text-[10px] px-2 py-0.5 rounded-full font-bold">1</span>
-            </Link>
-            <Link href="/audit" className="px-4 py-2 text-sm font-medium opacity-60 hover:opacity-100 transition-opacity">
-              Audit Logs
-            </Link>
-          </nav>
+          <div>
+            <h3 className="text-lg font-serif text-amber-500">Action Required</h3>
+            <p className="text-sm opacity-80 mt-1">1 contract is deadlocked and waiting on your executive decision.</p>
+          </div>
         </div>
-        <div className="p-4">
+        <Link href="/platform">
+          <button className="px-6 py-3 bg-amber-500 text-black rounded-md text-xs font-bold uppercase tracking-wider hover:bg-amber-400 transition-colors shrink-0 shadow-lg shadow-amber-500/20">
+            Review Now &rarr;
+          </button>
+        </Link>
+      </motion.div>
+
+      {/* ZONE 2: ACTIVE REVIEWS */}
+      <section>
+        <div className="flex justify-between items-end mb-6">
+          <h2 className="font-serif text-3xl">Active Mesh Computations</h2>
           <Link href="/platform">
-            <button className="w-full flex items-center justify-center gap-2 bg-[#e07a5f] text-white py-3 rounded-md text-sm font-bold uppercase tracking-wide hover:bg-opacity-90 transition-all shadow-md">
+            <button className="hidden md:flex items-center gap-2 px-5 py-2.5 bg-[#cc8b45] hover:bg-[#b57a3c] text-black rounded-md text-xs font-bold uppercase tracking-wider transition-colors shadow-lg shadow-[#cc8b45]/20">
               <Plus className="w-4 h-4" /> New Review
             </button>
           </Link>
         </div>
-      </aside>
-
-      {/* MAIN CONTENT */}
-      <main className="flex-1 overflow-y-auto">
-        <div className="max-w-5xl mx-auto p-6 md:p-12 flex flex-col gap-12">
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           
-          <header className="flex justify-between items-end md:hidden">
-            <Link href="/" className="font-serif text-2xl tracking-tight text-[#e07a5f]">Cordane.</Link>
-            <Link href="/platform" className="text-[#e07a5f] text-sm font-bold uppercase">New Review &rarr;</Link>
-          </header>
-
-          {/* ZONE 1: ATTENTION BANNER */}
-          <motion.div 
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-[0_0_30px_-10px_rgba(245,158,11,0.15)]"
-          >
-            <div className="flex items-center gap-3">
-              <AlertTriangle className="w-5 h-5 text-amber-500" />
-              <div>
-                <h3 className="text-sm font-bold text-amber-500">Action Required</h3>
-                <p className="text-xs opacity-80 mt-0.5">1 contract is deadlocked and waiting on your executive decision.</p>
+          <div className="relative bg-background/60 backdrop-blur-xl border border-border/50 rounded-xl p-8 overflow-hidden hover:scale-[1.02] transition-transform duration-500 group shadow-2xl">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#cc8b45]/10 via-[#cc8b45] to-[#cc8b45]/10 animate-pulse"></div>
+            
+            <div className="flex justify-between items-start mb-6">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-[#cc8b45]/10 rounded-lg border border-[#cc8b45]/20 group-hover:bg-[#cc8b45]/20 transition-colors">
+                  <FileText className="w-5 h-5 text-[#cc8b45]" />
+                </div>
+                <div>
+                  <h3 className="font-serif text-xl">Salesforce Renewal</h3>
+                  <p className="text-xs font-mono uppercase tracking-widest opacity-50 mt-1">Salesforce Inc.</p>
+                </div>
               </div>
+              <span className="flex items-center gap-1.5 text-xs font-mono bg-white/5 px-2.5 py-1.5 rounded-md border border-white/10">
+                <Clock className="w-3.5 h-3.5 text-[#cc8b45] animate-pulse" /> 01:24
+              </span>
             </div>
+            
+            <div className="grid grid-cols-4 gap-3 mb-8 bg-black/20 p-4 rounded-lg border border-white/5">
+              {["LGL", "FIN", "RSK", "OPS"].map(role => (
+                <div key={role} className="flex flex-col items-center gap-2">
+                  <div className={`w-3 h-3 rounded-full ${role === 'FIN' || role === 'LGL' ? 'bg-[#cc8b45] animate-pulse shadow-[0_0_15px_rgba(204,139,69,0.6)]' : 'bg-white/10'}`}></div>
+                  <span className={`text-[10px] font-mono ${role === 'FIN' || role === 'LGL' ? 'opacity-100 text-[#cc8b45]' : 'opacity-40'}`}>{role}</span>
+                </div>
+              ))}
+            </div>
+
             <Link href="/platform">
-              <button className="px-4 py-2 bg-amber-500 text-white rounded-md text-xs font-bold uppercase tracking-wider hover:bg-amber-600 transition-colors shrink-0">
-                Review Now &rarr;
+              <button className="w-full py-3 border border-[#cc8b45]/30 text-[#cc8b45] text-xs font-bold uppercase tracking-wider rounded-md hover:bg-[#cc8b45]/10 hover:border-[#cc8b45]/50 transition-all">
+                Enter Room &rarr;
               </button>
             </Link>
-          </motion.div>
+          </div>
 
-          {/* ZONE 2: ACTIVE REVIEWS */}
-          <section>
-            <h2 className="font-serif text-2xl mb-6">Active Mesh Computations</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              
-              <div className="relative bg-background/40 border border-border rounded-lg p-6 overflow-hidden">
-                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#e07a5f]/20 via-[#e07a5f] to-[#e07a5f]/20 animate-pulse"></div>
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <h3 className="font-bold text-lg">Salesforce Renewal</h3>
-                    <p className="text-sm opacity-60">Salesforce Inc.</p>
-                  </div>
-                  <span className="flex items-center gap-1 text-xs font-mono bg-white/5 px-2 py-1 rounded border border-white/10">
-                    <Clock className="w-3 h-3 text-[#e07a5f]" /> 01:24
-                  </span>
-                </div>
-                
-                <div className="grid grid-cols-4 gap-2 mb-6">
-                  {["LGL", "FIN", "RSK", "OPS"].map(role => (
-                    <div key={role} className="flex flex-col items-center gap-2">
-                      <div className="w-3 h-3 rounded-full bg-[#e07a5f] animate-pulse shadow-[0_0_10px_rgba(224,122,95,0.6)]"></div>
-                      <span className="text-[10px] font-mono opacity-50">{role}</span>
-                    </div>
-                  ))}
-                </div>
-
-                <Link href="/platform">
-                  <button className="w-full py-2 border border-[#e07a5f]/30 text-[#e07a5f] text-xs font-bold uppercase tracking-wider rounded hover:bg-[#e07a5f]/10 transition-colors">
-                    View Room &rarr;
-                  </button>
-                </Link>
-              </div>
-
-              {/* Empty State Card */}
-              <div className="bg-background/20 border border-dashed border-border rounded-lg p-6 flex flex-col items-center justify-center text-center gap-4 min-h-[200px]">
-                <p className="text-sm opacity-60 max-w-xs">Your review room has capacity. Drop another contract to spin up a new mesh.</p>
-                <Link href="/platform">
-                  <button className="text-[#e07a5f] text-xs font-bold uppercase tracking-wider hover:underline">
-                    Start a Review
-                  </button>
-                </Link>
-              </div>
-
+          {/* Empty State Card */}
+          <div className="bg-background/20 backdrop-blur-sm border-2 border-dashed border-border/50 rounded-xl p-8 flex flex-col items-center justify-center text-center gap-5 min-h-[250px] hover:bg-background/40 hover:border-[#cc8b45]/30 transition-all cursor-pointer group">
+            <div className="p-4 bg-white/5 rounded-full group-hover:bg-[#cc8b45]/10 transition-colors">
+              <Plus className="w-6 h-6 text-white/40 group-hover:text-[#cc8b45] transition-colors" />
             </div>
-          </section>
-
-          {/* ZONE 3: RECENT VERDICTS */}
-          <section>
-            <h2 className="font-serif text-2xl mb-6">Recent Verdicts</h2>
-            <div className="bg-background/40 border border-border rounded-lg overflow-hidden">
-              <table className="w-full text-left text-sm">
-                <thead>
-                  <tr className="border-b border-border bg-white/5">
-                    <th className="px-6 py-4 font-mono text-xs uppercase tracking-wider opacity-60 font-normal">Contract</th>
-                    <th className="px-6 py-4 font-mono text-xs uppercase tracking-wider opacity-60 font-normal hidden sm:table-cell">Vendor</th>
-                    <th className="px-6 py-4 font-mono text-xs uppercase tracking-wider opacity-60 font-normal">Verdict</th>
-                    <th className="px-6 py-4 font-mono text-xs uppercase tracking-wider opacity-60 font-normal hidden md:table-cell">Date</th>
-                    <th className="px-6 py-4 font-mono text-xs uppercase tracking-wider opacity-60 font-normal text-right">Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {RECENT_VERDICTS.map((v) => (
-                    <tr key={v.id} className="border-b border-border/50 hover:bg-white/5 transition-colors group">
-                      <td className="px-6 py-4 font-medium">{v.contract}</td>
-                      <td className="px-6 py-4 opacity-70 hidden sm:table-cell">{v.vendor}</td>
-                      <td className="px-6 py-4">
-                        {v.status === "Approved" && <span className="inline-flex items-center gap-1.5 text-green-500 bg-green-500/10 px-2 py-1 rounded text-xs font-medium"><CheckCircle2 className="w-3.5 h-3.5"/> Approved</span>}
-                        {v.status === "Escalated" && <span className="inline-flex items-center gap-1.5 text-amber-500 bg-amber-500/10 px-2 py-1 rounded text-xs font-medium"><AlertTriangle className="w-3.5 h-3.5"/> Escalated</span>}
-                        {v.status === "Rejected" && <span className="inline-flex items-center gap-1.5 text-red-500 bg-red-500/10 px-2 py-1 rounded text-xs font-medium"><XCircle className="w-3.5 h-3.5"/> Rejected</span>}
-                      </td>
-                      <td className="px-6 py-4 opacity-70 hidden md:table-cell font-mono text-xs">{v.date}</td>
-                      <td className="px-6 py-4 text-right">
-                        <Link href="/platform">
-                          <button className={`text-xs font-bold uppercase tracking-wider ${v.action === "Decide" ? "text-amber-500" : "text-white/50 hover:text-white"}`}>
-                            {v.action}
-                          </button>
-                        </Link>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              <div className="p-4 border-t border-border flex justify-center">
-                <button className="text-xs font-mono uppercase tracking-wider opacity-50 hover:opacity-100 transition-opacity">
-                  Load More
-                </button>
-              </div>
+            <div>
+              <h3 className="font-serif text-lg mb-1">Upload Contract</h3>
+              <p className="text-sm opacity-50 max-w-xs">Your mesh has capacity. Drop a contract to spin up a new review room.</p>
             </div>
-          </section>
+          </div>
 
         </div>
-      </main>
+      </section>
+
+      {/* ZONE 3: RECENT VERDICTS */}
+      <section>
+        <h2 className="font-serif text-3xl mb-6">Recent Verdicts</h2>
+        <div className="bg-background/60 backdrop-blur-xl border border-border/50 rounded-xl overflow-hidden shadow-2xl">
+          <table className="w-full text-left text-sm">
+            <thead>
+              <tr className="border-b border-white/5 bg-black/20">
+                <th className="px-6 py-5 font-mono text-[10px] uppercase tracking-widest opacity-50 font-normal">Contract</th>
+                <th className="px-6 py-5 font-mono text-[10px] uppercase tracking-widest opacity-50 font-normal hidden sm:table-cell">Vendor</th>
+                <th className="px-6 py-5 font-mono text-[10px] uppercase tracking-widest opacity-50 font-normal">Verdict</th>
+                <th className="px-6 py-5 font-mono text-[10px] uppercase tracking-widest opacity-50 font-normal hidden md:table-cell">Date</th>
+                <th className="px-6 py-5 font-mono text-[10px] uppercase tracking-widest opacity-50 font-normal text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {RECENT_VERDICTS.map((v) => (
+                <tr key={v.id} className="border-b border-white/5 hover:bg-white/5 transition-colors group">
+                  <td className="px-6 py-5 font-sans font-medium text-foreground/90">{v.contract}</td>
+                  <td className="px-6 py-5 font-mono text-xs opacity-60 hidden sm:table-cell">{v.vendor}</td>
+                  <td className="px-6 py-5">
+                    {v.status === "Approved" && <span className="inline-flex items-center gap-2 text-green-500 bg-green-500/10 border border-green-500/20 px-3 py-1.5 rounded-md text-xs font-medium"><CheckCircle2 className="w-4 h-4"/> Approved</span>}
+                    {v.status === "Escalated" && <span className="inline-flex items-center gap-2 text-amber-500 bg-amber-500/10 border border-amber-500/20 px-3 py-1.5 rounded-md text-xs font-medium"><AlertTriangle className="w-4 h-4"/> Escalated</span>}
+                    {v.status === "Rejected" && <span className="inline-flex items-center gap-2 text-red-500 bg-red-500/10 border border-red-500/20 px-3 py-1.5 rounded-md text-xs font-medium"><XCircle className="w-4 h-4"/> Rejected</span>}
+                  </td>
+                  <td className="px-6 py-5 opacity-50 hidden md:table-cell font-mono text-xs">{v.date}</td>
+                  <td className="px-6 py-5 text-right">
+                    <Link href="/platform">
+                      <button className={`text-[10px] font-bold uppercase tracking-widest px-4 py-2 rounded-md transition-all ${v.action === "Decide" ? "bg-amber-500/10 text-amber-500 hover:bg-amber-500/20" : "bg-white/5 text-foreground/50 hover:bg-white/10 hover:text-foreground"}`}>
+                        {v.action}
+                      </button>
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <div className="p-4 bg-black/20 flex justify-center">
+            <button className="text-[10px] font-mono uppercase tracking-widest opacity-40 hover:opacity-100 transition-opacity flex items-center gap-2">
+              Load More <ArrowRight className="w-3 h-3" />
+            </button>
+          </div>
+        </div>
+      </section>
 
     </div>
   );

@@ -4,9 +4,15 @@
 
 @layer base {
   :root {
-    --background: 240 10% 4%;
-    --foreground: 0 0% 98%;
-    --border: 240 10% 12%;
+    --background: 30 20% 98%;
+    --foreground: 240 10% 4%;
+    --border: 30 10% 90%;
+  }
+
+  .dark {
+    --background: 30 15% 6%;
+    --foreground: 30 10% 95%;
+    --border: 30 20% 12%;
   }
 
   body {
