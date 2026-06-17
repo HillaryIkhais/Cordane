@@ -27,11 +27,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <PrivyProvider
       appId={appId}
       config={{
-        loginMethods: ["email", "wallet"],
+        loginMethods: ["email"],
         appearance: {
           theme: "dark",
           accentColor: "#e07a5f",
-          logo: "https://auth.privy.io/logos/privy-logo.png",
         },
       }}
     >

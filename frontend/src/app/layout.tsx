@@ -24,9 +24,7 @@ export default function RootLayout({
       <body className={`antialiased font-sans bg-background text-foreground`}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
           <AuthProvider>
-            <AuthGuard>
-              {children}
-            </AuthGuard>
+            {children}
           </AuthProvider>
         </ThemeProvider>
       </body>

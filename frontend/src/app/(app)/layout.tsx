@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, Scale, Shield, Settings, FileText, Upload } from "lucide-react";
 import { Logo } from "@/components/logo";
+import { AuthGuard } from "@/components/auth/AuthGuard";
 
 const navItems = [
   { href: "/dashboard", icon: Home, label: "Overview" },
@@ -63,5 +64,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       </main>
       
     </div>
+    </AuthGuard>
   );
 }
