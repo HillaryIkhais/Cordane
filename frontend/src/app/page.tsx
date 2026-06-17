@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { ArrowRight, Shield, Scale, Calculator, Settings, CheckCircle2 } from "lucide-react";
-import { motion } from "framer-motion";
 import { Logo } from "@/components/logo";
 
 export default function LandingPage() {
@@ -26,19 +25,8 @@ export default function LandingPage() {
       {/* Hero Section */}
       <section className="relative min-h-screen flex flex-col items-center justify-center text-center px-6 overflow-hidden pt-20">
         
-        {/* Cinematic Lighting & Orbs */}
+        {/* Cinematic Lighting */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-[#e07a5f]/10 blur-[120px] rounded-full pointer-events-none -z-10" />
-        
-        <motion.div 
-          animate={{ y: [0, -20, 0], rotate: [0, 5, 0] }}
-          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-[20%] left-[15%] w-32 h-32 rounded-3xl bg-white/5 backdrop-blur-md border border-white/10 shadow-xl pointer-events-none"
-        />
-        <motion.div 
-          animate={{ y: [0, 25, 0], rotate: [0, -10, 0] }}
-          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute bottom-[20%] right-[15%] w-48 h-48 rounded-full bg-[#e07a5f]/10 backdrop-blur-lg border border-[#e07a5f]/20 shadow-2xl pointer-events-none"
-        />
 
         <div className="space-y-8 max-w-5xl z-10">
           <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full border border-white/10 bg-white/5 backdrop-blur-md mb-4 shadow-[0_0_15px_-5px_rgba(224,122,95,0.3)]">
