@@ -23,9 +23,11 @@ export default function PlatformPage() {
   const [isFetching, setIsFetching] = useState(false);
   const [transcript, setTranscript] = useState<{role: string, content: string, score?: number}[]>([]);
   const [backendVerdict, setBackendVerdict] = useState<any>(null);
-  const [messageIndex, setMessageIndex] = useState(0);
-  const [verdict, setVerdict] = useState<VerdictType | null>(null);
 
+  
+  // Negotiation State
+  const [messageIndex, setMessageIndex] = useState(0);
+  const [verdict, setVerdict] = useState<VerdictType>("ESCALATED");
   // Auto-advance negotiation animation
   useEffect(() => {
     if (roomState === "NEGOTIATING" && !isFetching && transcript.length > 0) {
