@@ -1,9 +1,15 @@
 
 > cordane-next@0.1.0 dev
-> next dev -p 3042
+> next dev -p 3043
 
   ▲ Next.js 14.2.4
-  - Local:        http://localhost:3042
+  - Local:        http://localhost:3043
+  - Environments: .env.local
 
  ✓ Starting...
- ✓ Ready in 13.1s
+ ✓ Ready in 2.6   Reload env: .env.local
+� Compiled / in 20.1s (7972 modules)
+ ✓ Compiled in 1311ms (3930 modules)
+   Reload env: .env.local
+ ✓ Compiled in 1234ms (3916 modules)
+ ✓ Compiled in 944ms (3930 modules)
