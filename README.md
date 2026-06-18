@@ -63,13 +63,13 @@ Each model was selected for the specific cognitive task of that agent — not by
 
 ## Why Band Is the Backbone — Not a Wrapper
 
-This is the architectural decision that makes Cordane different from every other multi-agent submission.
+This is the architectural decision that makes Cordane an intriguing multi-agent system.
 
 Most systems run agents in parallel, collect their outputs, and push a summary to Band at the end. That's a notification channel.
 
 In Cordane, **every agent-to-agent handoff goes through Band's shared room**. The Finance agent cannot set its budget threshold without reading what Legal posted. The Risk agent cannot calibrate its threat score without Finance's constraints. Band is not where results are reported — it's where the negotiation happens.
 
-When a judge looks at the Band room logs, they will see a real conversation: agents reading each other's context, posting structured responses, and changing their positions based on what they read. That's the collaboration criterion. Not simulated — demonstrated.
+When looking at the Band room logs, you will see a real conversation: agents reading each other's context, posting structured responses, and changing their positions based on what they read. That's the collaboration criterion. Clearly demonstrated.
 
 ---
 
@@ -181,7 +181,6 @@ npm run dev
 
 ## Built By
 
-**Hillary Ikhais** — ML Engineer, CS student at FUPRE, Nigeria
 Team **Stratum** · Band of Agents Hackathon 2026
 [github.com/HillaryIkhais](https://github.com/HillaryIkhais)
 
