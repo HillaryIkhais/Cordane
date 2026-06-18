@@ -28,7 +28,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       appId={appId}
       clientId={process.env.NEXT_PUBLIC_PRIVY_CLIENT_ID}
       config={{
-        loginMethods: ["email", "google"],
+        loginMethods: ["google", "apple", "sms", "email"],
         appearance: {
           theme: "dark",
           accentColor: "#cc8b45",
