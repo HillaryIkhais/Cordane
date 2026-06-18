@@ -196,22 +196,22 @@ export default function LandingPage() {
           <div className="absolute inset-0 z-10 w-full h-full flex flex-col justify-center gap-4">
             
             {/* Top Row */}
-            <div className="flex justify-between w-[110%] -ml-[5%] gap-4 px-4 translate-y-[-40px]">
+            <div className="flex justify-between w-full md:w-[110%] md:-ml-[5%] gap-3 md:gap-4 px-2 md:px-4 translate-y-[-20px] md:translate-y-[-40px]">
               {/* LEGAL (Index 0) */}
-              <div className={`flex-1 bg-background/60 backdrop-blur-xl border rounded-xl p-5 shadow-2xl transition-all duration-500 hover:scale-105 ${isCardActive(0) ? "border-[#cc8b45] shadow-[0_0_30px_rgba(204,139,69,0.3)] bg-background/80 scale-105" : "border-border/50 scale-100"}`}>
-                <h3 className="font-sans text-lg text-foreground mb-1">Legal</h3>
-                <p className="text-[10px] font-mono uppercase tracking-widest text-foreground/40">Risk Mitigation</p>
+              <div className={`flex-1 bg-background/60 backdrop-blur-xl border rounded-xl p-3 md:p-5 shadow-2xl transition-all duration-500 hover:scale-105 ${isCardActive(0) ? "border-[#cc8b45] shadow-[0_0_30px_rgba(204,139,69,0.3)] bg-background/80 scale-105" : "border-border/50 scale-100"}`}>
+                <h3 className="font-sans text-sm md:text-lg text-foreground mb-1">Legal</h3>
+                <p className="text-[8px] md:text-[10px] font-mono uppercase tracking-widest text-foreground/40">Risk Mitigation</p>
               </div>
               {/* FINANCE (Index 1) */}
-              <div className={`flex-1 bg-background/60 backdrop-blur-xl border rounded-xl p-5 shadow-2xl flex flex-col items-start relative transition-all duration-500 hover:scale-105 ${isCardActive(1) ? "border-[#cc8b45] shadow-[0_0_30px_rgba(204,139,69,0.3)] bg-background/80 scale-105" : "border-border/50 scale-100"}`}>
-                <div className={`absolute top-6 right-5 w-1.5 h-1.5 rounded-full ${isCardActive(1) ? "bg-[#cc8b45] animate-pulse" : "bg-foreground/20"}`}></div>
-                <h3 className="font-sans text-lg text-foreground mb-1">Finance</h3>
-                <p className="text-[10px] font-mono uppercase tracking-widest text-foreground/40">Margin Analysis</p>
+              <div className={`flex-1 bg-background/60 backdrop-blur-xl border rounded-xl p-3 md:p-5 shadow-2xl flex flex-col items-start relative transition-all duration-500 hover:scale-105 ${isCardActive(1) ? "border-[#cc8b45] shadow-[0_0_30px_rgba(204,139,69,0.3)] bg-background/80 scale-105" : "border-border/50 scale-100"}`}>
+                <div className={`absolute top-4 md:top-6 right-4 md:right-5 w-1.5 h-1.5 rounded-full ${isCardActive(1) ? "bg-[#cc8b45] animate-pulse" : "bg-foreground/20"}`}></div>
+                <h3 className="font-sans text-sm md:text-lg text-foreground mb-1">Finance</h3>
+                <p className="text-[8px] md:text-[10px] font-mono uppercase tracking-widest text-foreground/40">Margin Analysis</p>
               </div>
             </div>
 
             {/* Middle Row */}
-            <div className="flex justify-between w-[120%] -ml-[10%] gap-4 px-4 z-20">
+            <div className="flex justify-between w-full md:w-[120%] md:-ml-[10%] gap-3 md:gap-4 px-2 md:px-4 z-20">
               {/* RISK (Index 2) */}
               <div className={`flex-1 bg-background/90 backdrop-blur-2xl border rounded-xl p-5 shadow-2xl flex flex-col items-start relative transition-all duration-500 ${isCardActive(2) ? "border-[#cc8b45] shadow-[0_0_30px_rgba(204,139,69,0.3)] scale-110" : "border-border/50 scale-105"}`}>
                 <div className={`absolute top-6 right-5 w-1.5 h-1.5 rounded-full ${isCardActive(2) ? "bg-[#cc8b45] animate-pulse" : "bg-foreground/20"}`}></div>

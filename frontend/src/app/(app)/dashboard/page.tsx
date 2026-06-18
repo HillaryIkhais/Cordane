@@ -188,8 +188,8 @@ export default function DashboardPage() {
         <h2 className="font-serif text-3xl mb-6">Recent Verdicts</h2>
         
         {verdicts.length > 0 ? (
-          <div className="bg-background/60 backdrop-blur-xl border border-border/50 rounded-xl overflow-hidden shadow-2xl">
-            <table className="w-full text-left text-sm">
+          <div className="bg-background/60 backdrop-blur-xl border border-border/50 rounded-xl overflow-hidden shadow-2xl overflow-x-auto">
+            <table className="w-full text-left text-sm min-w-[600px]">
               <thead>
                 <tr className="border-b border-foreground/5 bg-foreground/5">
                   <th className="px-6 py-5 font-mono text-[10px] uppercase tracking-widest opacity-50 font-normal">Contract</th>
