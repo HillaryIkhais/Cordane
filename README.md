@@ -75,64 +75,7 @@ When looking at the Band room logs, you will see a real conversation: agents rea
 
 ## System Architecture
 
-```mermaid
-graph TD
-    %% Nodes
-    User((Executive))
-    Dashboard[Next.js Dashboard]
-    API{FastAPI Orchestrator}
-    Room[(Band Shared Room)]
-    
-    subgraph Agents [Multi-Agent Consensus Engine]
-        L[Legal Agent<br/>Claude 3.5 Sonnet]
-        F[Finance Agent<br/>GPT-4o]
-        R[Risk Agent<br/>DeepSeek Reasoner]
-        O[Ops Agent<br/>Llama 3 70B]
-    end
-    
-    CE[Consensus Evaluator]
-    
-    subgraph Outcomes [Decision Outcomes]
-        Pass[APPROVED]
-        Rej[REJECTED]
-        Esc[ESCALATED]
-    end
-    
-    Log[[Immutable Audit Log]]
 
-    %% Data Flow
-    User -->|Uploads Contract| Dashboard
-    Dashboard --> API
-    API -->|Triggers @mention| Room
-    
-    %% Agent Collaboration
-    Room -->|Distributes Context| L & F & R & O
-    L & F & R & O -->|Negotiate < 3 Rounds| Room
-    
-    %% Decision
-    Room -->|Full Log| CE
-    CE --> Pass
-    CE --> Rej
-    CE --> Esc
-    
-    %% Audit
-    Pass & Rej & Esc --> Log
-
-    %% Brand Styling
-    style User fill:#1A1A1A,stroke:#333,color:#FFF
-    style Dashboard fill:#111,stroke:#444,color:#FFF
-    style API fill:#00AA66,stroke:#007744,color:#FFF
-    style Room fill:#0066FF,stroke:#0044BB,color:#FFF
-    style L fill:#2B2D42,stroke:#1A1A24,color:#FFF
-    style F fill:#2B2D42,stroke:#1A1A24,color:#FFF
-    style R fill:#2B2D42,stroke:#1A1A24,color:#FFF
-    style O fill:#2B2D42,stroke:#1A1A24,color:#FFF
-    style CE fill:#1A1A1A,stroke:#555,color:#FFF,stroke-dasharray: 5 5
-    style Pass fill:#276F4B,stroke:#15402A,color:#FFF
-    style Rej fill:#8B2635,stroke:#52141D,color:#FFF
-    style Esc fill:#C8853A,stroke:#9A662C,color:#FFF
-    style Log fill:#111,stroke:#555,color:#0066FF,stroke-width:2px
-```
 
 ---
 
