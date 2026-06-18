@@ -183,7 +183,7 @@ export default function LandingPage() {
                     className={`object-contain transition-all duration-1000 ease-in-out ${
                       currentTheme === "light"
                         ? "mix-blend-multiply opacity-90 scale-100"
-                        : "mix-blend-screen opacity-100 scale-100 filter invert"
+                        : "mix-blend-screen opacity-100 scale-100 invert hue-rotate-180 brightness-110"
                     }`}
                     priority
                   />
