@@ -40,12 +40,11 @@ async def execute_mesh_graph(contract_id: str, raw_text: str) -> EnterpriseConte
     mesh_state = ContractMeshState()
     models = ModelRoutingConfig()
     
-    # 3. Parallel Agent Inference (Live AI/ML API & Featherless)
+    # 3. Parallel Agent Inference (Live AI/ML API)
     _shared_room.clear()
     await _shared_room.post_message("system", "system", "Executing Deterministic Enterprise State-Machine")
     
-    # We run the actual AI models in evaluate().
-    # evaluate() routes legal/risk to Claude (AI/ML) and finance/ops to DeepSeek (Featherless)
+    # We run the actual AI models in evaluate() via AI/ML API
     legal_res = await legal_agent.evaluate({"contract_text": raw_text}, 1)
     finance_res = await finance_agent.evaluate({"contract_text": raw_text}, 1)
     risk_res = await risk_agent.evaluate({"contract_text": raw_text}, 1)

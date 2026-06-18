@@ -265,22 +265,28 @@ export default function PlatformPage() {
               <div className="flex flex-col sm:flex-row justify-center gap-6 pt-10 border-t border-border/50">
                 {verdict === "ESCALATED" && (
                   <>
-                    <button className="px-8 py-4 bg-amber-500 text-black font-bold text-xs uppercase tracking-wider rounded-md hover:bg-amber-400 transition-colors shadow-lg shadow-amber-500/20">
-                      Approve Anyway
-                    </button>
-                    <button className="px-8 py-4 bg-transparent border border-foreground/10 text-foreground font-bold text-xs uppercase tracking-wider rounded-md hover:bg-foreground/5 transition-colors">
-                      Send for Revision
-                    </button>
+                    <Link href="/dashboard" className="w-full sm:w-auto">
+                      <button className="w-full px-8 py-4 bg-amber-500 text-black font-bold text-xs uppercase tracking-wider rounded-md hover:bg-amber-400 transition-colors shadow-lg shadow-amber-500/20">
+                        Approve Anyway
+                      </button>
+                    </Link>
+                    <Link href="/dashboard" className="w-full sm:w-auto">
+                      <button className="w-full px-8 py-4 bg-transparent border border-foreground/10 text-foreground font-bold text-xs uppercase tracking-wider rounded-md hover:bg-foreground/5 transition-colors">
+                        Send for Revision
+                      </button>
+                    </Link>
                   </>
                 )}
                 
                 {verdict !== "ESCALATED" && (
-                  <button className="px-8 py-4 bg-foreground/5 border border-foreground/10 text-foreground font-bold text-xs uppercase tracking-wider rounded-md hover:bg-foreground/10 transition-colors flex items-center justify-center gap-3">
-                    <Download className="w-4 h-4" /> Download Report
-                  </button>
+                  <Link href="/dashboard" className="w-full sm:w-auto">
+                    <button className="w-full px-8 py-4 bg-foreground/5 border border-foreground/10 text-foreground font-bold text-xs uppercase tracking-wider rounded-md hover:bg-foreground/10 transition-colors flex items-center justify-center gap-3">
+                      <Download className="w-4 h-4" /> Return to Dashboard
+                    </button>
+                  </Link>
                 )}
 
-                <Link href="/upload" className="flex items-center">
+                <Link href="/upload" className="w-full sm:w-auto flex items-center">
                   <button className="px-8 py-4 bg-transparent text-[#cc8b45] font-bold text-xs uppercase tracking-wider rounded-md hover:bg-[#cc8b45]/10 hover:border hover:border-[#cc8b45]/30 transition-all flex items-center justify-center gap-3 border border-transparent w-full">
                     <RotateCcw className="w-4 h-4" /> Start New Review
                   </button>

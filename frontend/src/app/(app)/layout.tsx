@@ -16,7 +16,7 @@ const navItems = [
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
 
   return (
     <AuthGuard>
@@ -59,9 +59,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             
             <div className="p-4 rounded-xl bg-background/40 border border-border/50 flex flex-col gap-3 mx-2">
               <div className="flex justify-between items-start">
-                <div className="flex flex-col gap-1">
-                  <span className="text-xs font-mono text-foreground/40 uppercase tracking-wider">Workspace</span>
-                  <span className="text-sm font-medium text-foreground/90">Acme Corp</span>
+                <div className="flex flex-col gap-1 w-full overflow-hidden pr-2">
+                  <span className="text-xs font-mono text-foreground/40 uppercase tracking-wider">Account</span>
+                  <span className="text-xs font-medium text-foreground/90 truncate w-full" title={user?.email?.address || user?.google?.email || "Authenticated User"}>
+                    {user?.email?.address || user?.google?.email || "Authenticated User"}
+                  </span>
                 </div>
                 <ThemeToggle />
               </div>

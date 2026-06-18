@@ -26,6 +26,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   return (
     <PrivyProvider
       appId={appId}
+      clientId={process.env.NEXT_PUBLIC_PRIVY_CLIENT_ID}
       config={{
         loginMethods: ["email", "google"],
         appearance: {

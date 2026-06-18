@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Upload, FileText, Settings2, ShieldAlert, Zap, Lock } from "lucide-react";
@@ -8,6 +8,19 @@ import { Upload, FileText, Settings2, ShieldAlert, Zap, Lock } from "lucide-reac
 export default function UploadPage() {
   const [isDragging, setIsDragging] = useState(false);
   const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileAction = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement> | React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    // In a real app we'd process the file here. For now, navigate.
+    router.push('/platform');
+  };
   
   return (
     <div className="max-w-5xl mx-auto p-6 md:p-12 flex flex-col gap-12 relative z-10">
@@ -21,12 +34,20 @@ export default function UploadPage() {
 
       {/* Main Drag & Drop Zone */}
       <div 
-        onClick={() => router.push('/platform')}
+        onClick={handleFileAction}
         className={`w-full h-[400px] border-2 border-dashed rounded-3xl flex flex-col items-center justify-center text-center transition-all duration-500 relative overflow-hidden group cursor-pointer ${isDragging ? 'bg-[#cc8b45]/10 border-[#cc8b45] shadow-[0_0_50px_rgba(204,139,69,0.2)]' : 'bg-background/40 backdrop-blur-xl border-border/50 hover:bg-background/60 hover:border-[#cc8b45]/50 shadow-2xl'}`}
         onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
         onDragLeave={() => setIsDragging(false)}
-        onDrop={(e) => { e.preventDefault(); setIsDragging(false); router.push('/platform'); }}
+        onDrop={(e) => { setIsDragging(false); handleFileSelect(e); }}
       >
+        <input 
+          type="file" 
+          ref={fileInputRef} 
+          className="hidden" 
+          onChange={handleFileSelect} 
+          accept=".pdf,.doc,.docx,.txt"
+        />
+        
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[300px] h-[300px] bg-[#cc8b45] blur-[150px] opacity-10 pointer-events-none group-hover:opacity-20 transition-opacity"></div>
         
         <div className={`w-24 h-24 rounded-full flex items-center justify-center mb-8 transition-transform duration-500 ${isDragging ? 'bg-[#cc8b45] scale-110 shadow-[0_0_30px_rgba(204,139,69,0.5)]' : 'bg-[#cc8b45]/10 group-hover:bg-[#cc8b45]/20 group-hover:scale-105'}`}>

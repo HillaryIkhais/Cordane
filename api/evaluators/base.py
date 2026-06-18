@@ -16,14 +16,10 @@ class BaseAgent:
         self.role = role
         self.room = room
         self.system_prompt = system_prompt
-        # We initialize flexible clients for both AI/ML API and Featherless API
+        # Initialize client for AI/ML API
         self.aiml_client = OpenAI(
             api_key=os.environ.get("AIML_API_KEY", "mock_aiml_key"),
             base_url="https://api.aimlapi.com/v1"
-        )
-        self.featherless_client = OpenAI(
-            api_key=os.environ.get("FEATHERLESS_API_KEY", "mock_featherless_key"),
-            base_url="https://api.featherless.ai/v1"
         )
 
     MODEL_ROUTING = {
@@ -34,10 +30,10 @@ class BaseAgent:
     }
 
     def route_inference(self, prompt: str, role_system_prompt: str) -> str:
-        """Route inference to the correct provider and model for this agent's role."""
+        """Route inference to the correct model for this agent's role."""
         route = self.MODEL_ROUTING[self.role]
         model = route["model"]
-        client = self.aiml_client if route["provider"] == "aiml" else self.featherless_client
+        client = self.aiml_client
 
         print(f"[Cordane Mesh] {self.role.upper()} → {model} via {route['provider']}...")
 
