@@ -42,12 +42,12 @@ export default function PlatformPage() {
         setMessageIndex(prev => {
           if (prev >= transcript.length - 1) {
             clearInterval(timer);
-            setTimeout(() => setRoomState("VERDICT"), 1500);
+            setTimeout(() => setRoomState("VERDICT"), 3000);
             return prev;
           }
           return prev + 1;
         });
-      }, 1500);
+      }, 4000);
       return () => clearInterval(timer);
     }
   }, [roomState, isFetching, transcript.length]);
