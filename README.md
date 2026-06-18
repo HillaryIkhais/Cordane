@@ -1,12 +1,19 @@
 <div align="center">
-  <img src="./frontend/public/logo-wordmark.png" alt="Cordane Logo" width="220" />
+  <img src="./frontend/public/logo-wordmark.png" alt="Cordane" width="200" />
   <h1>Cordane.</h1>
-  <p><b>The autonomous consensus engine that surfaces every contract risk before you sign.</b></p>
+  <p><b>Four agents. One verdict. No more email chains.</b></p>
   
   <p>
-    <img src="https://img.shields.io/badge/Track-Internal_Enterprise-cc8b45?style=flat-square" alt="Track 1" />
-    <img src="https://img.shields.io/badge/Partner-Band_SDK-blue?style=flat-square" alt="Band SDK" />
-    <img src="https://img.shields.io/badge/Partner-AI%2FML_API-green?style=flat-square" alt="AI/ML API" />
+    <img src="https://img.shields.io/badge/Track-Internal_Enterprise_Workflows-C8853A?style=flat-square" alt="Track 1" />
+    <img src="https://img.shields.io/badge/Hackathon-Band_of_Agents_2026-1A1A1A?style=flat-square" alt="Hackathon" />
+    <img src="https://img.shields.io/badge/Partner-Band_SDK-0066FF?style=flat-square" alt="Band SDK" />
+    <img src="https://img.shields.io/badge/Partner-AI%2FML_API-00AA66?style=flat-square" alt="AI/ML API" />
+  </p>
+
+  <p>
+    <img src="https://img.shields.io/badge/Python-3.11+-blue?style=flat-square" alt="Python" />
+    <img src="https://img.shields.io/badge/Next.js-14-black?style=flat-square" alt="Next.js" />
+    <img src="https://img.shields.io/badge/FastAPI-0.111-green?style=flat-square" alt="FastAPI" />
   </p>
 
   <p>
@@ -16,76 +23,224 @@
 
 ---
 
-## 🏆 The Problem
+## The Problem
 
-Enterprise contract reviews stall because Legal, Finance, Risk, and Operations can't align. They email in circles. Deals collapse — not because the terms were wrong, but because the right people never agreed in time.
+Enterprise contract approvals stall not because people don't care — but because Legal doesn't know what Finance flagged, and Risk doesn't know what Ops needs.
 
-**Cordane puts all four departments in the same room, simultaneously, before you sign anything.**
+The average vendor contract takes **eleven days** to clear internal review. Eleven days of Slack threads, reply-all emails, and missed deadlines. Nobody reads what the other department surfaced. The contract sits in someone's inbox.
 
-## 🧠 How It Works
+Cordane puts Legal, Finance, Risk, and Ops in the same room — and makes them actually talk to each other.
 
-Cordane is a deterministic, multi-agent consensus engine. A vendor contract is submitted. Four specialized AI agents — each powered by the model best suited for its domain — read it at the same time, debate the clauses through a shared Band room, and force a mathematically-grounded verdict. Executives only intervene when agents reach genuine deadlock.
+---
 
-## 🎯 AI/ML API — Mixture of Experts Architecture
+## What Cordane Does
 
-Every agent is powered by a different frontier model, routed exclusively through AI/ML API. This is not a single-model wrapper. This is a genuine Mixture of Experts:
+You submit a vendor contract. Four specialized AI agents read it simultaneously, then negotiate through a **Band shared room** — each agent reading what the others flag and recalibrating in real time.
 
-| Department | Model | Rationale |
-| :--- | :--- | :--- |
-| ⚖️ **Legal** | `claude-3-5-sonnet-20240620` | Best-in-class for dense document parsing and legal nuance |
-| 💰 **Finance** | `gpt-4o` | Superior numerical reasoning and structured data extraction |
-| 🛡️ **Risk** | `deepseek-reasoner` | Deep Chain-of-Thought for compliance edge cases |
-| ⚙️ **Ops** | `meta-llama/Llama-3-70b-chat-hf` | Efficient open-weights model for SLA structuring |
+They don't run in parallel and dump four separate reports. They react to each other. When Legal flags an uncapped liability clause, Risk reads it and elevates its threat score. When Finance recalculates the budget threshold, Ops adjusts its integration assessment. The dependencies are real, not theatrical.
 
-## 🔌 Band SDK — The Collaboration Backbone
+**Three possible outputs:**
+- ✅ **Approved** — agents reached consensus, full audit trail attached
+- ❌ **Rejected** — specific clause or constraint blocked consensus, exact reason surfaced  
+- ⚠️ **Escalated** — agents couldn't agree after 3 negotiation rounds; human gets a precise summary of exactly what's blocking and what each agent needs
 
-Band is not a side channel in Cordane. It **is** the negotiation layer.
+The executive doesn't wade through four reports. One verdict. One audit trail. One action.
 
-The FastAPI orchestrator @mentions agents into a shared Band room. Each agent reads the full conversation context from the room, reasons against it, and posts its verdict back. The next agent reads that verdict before it reasons. This creates genuine cross-departmental awareness — Legal's position shapes Finance's calculation, which shapes Risk's threshold.
+---
+
+## Agent Roster
+
+| Agent | Model | Provider | Role |
+|:---|:---|:---|:---|
+| ⚖️ **Legal** | `claude-3-5-sonnet-20240620` | AI/ML API | Parses contract language, flags liability terms, data ownership clauses, indemnification risks |
+| 💰 **Finance** | `gpt-4o` | AI/ML API | Checks payment terms, cost thresholds, margin calculations, flags budget conflicts |
+| 🛡️ **Risk** | `deepseek-reasoner` | AI/ML API | Scores vendor reliability, flags concentration risk, OFAC/GDPR compliance gaps |
+| ⚙️ **Ops** | `meta-llama/Llama-3-70b-instruct` | AI/ML API | Assesses integration feasibility, timeline realism, team capacity blockers |
+
+Each model was selected for the specific cognitive task of that agent — not by popularity. Claude leads every legal benchmark for clause identification and ambiguous language interpretation. GPT-4o handles numerical precision. DeepSeek-Reasoner is built for chain-of-thought multi-factor scoring. Llama 3 70B handles practical operational reasoning at speed.
+
+---
+
+## Why Band Is the Backbone — Not a Wrapper
+
+This is the architectural decision that makes Cordane different from every other multi-agent submission.
+
+Most systems run agents in parallel, collect their outputs, and push a summary to Band at the end. That's a notification channel.
+
+In Cordane, **every agent-to-agent handoff goes through Band's shared room**. The Finance agent cannot set its budget threshold without reading what Legal posted. The Risk agent cannot calibrate its threat score without Finance's constraints. Band is not where results are reported — it's where the negotiation happens.
+
+When a judge looks at the Band room logs, they will see a real conversation: agents @mentioning each other, posting structured context, and changing their positions based on what they read. That's the collaboration criterion. Not simulated — demonstrated.
+
+---
+
+## System Architecture
 
 ```mermaid
 graph TD
     A[Executive] -->|Uploads Contract| B(Cordane Dashboard)
     B -->|REST API| C{FastAPI Orchestrator}
     
-    C -->|@mention| D[Band Shared Room]
+    C -->|@mention triggers| D[Band Shared Room]
     
-    D -->|reads context, responds| E[Legal: Claude 3.5 Sonnet]
-    D -->|reads context, responds| F[Finance: GPT-4o]
-    D -->|reads context, responds| G[Risk: DeepSeek-Reasoner]
-    D -->|reads context, responds| H[Ops: Llama 3 70B]
+    D -->|reads shared context| E[Legal: Claude 3.5 Sonnet]
+    D -->|reads shared context| F[Finance: GPT-4o]
+    D -->|reads shared context| G[Risk: DeepSeek-Reasoner]
+    D -->|reads shared context| H[Ops: Llama 3 70B]
     
-    E -->|posts verdict + flags| D
-    F -->|posts verdict + flags| D
-    G -->|posts verdict + flags| D
-    H -->|posts verdict + flags| D
+    E -->|posts clause flags + risk scalar| D
+    F -->|posts budget threshold + payment verdict| D
+    G -->|posts threat score + compliance flags| D
+    H -->|posts feasibility verdict + timeline| D
     
-    D -->|full conversation log| I{Consensus Evaluator}
+    D -->|full negotiation log| I{Consensus Evaluator}
     
-    I -->|all pass| J[✅ APPROVED]
-    I -->|hard veto remains| K[⚠️ ESCALATED]
-    I -->|unanimous reject| L[❌ REJECTED]
+    I -->|veto + bounded rounds max 3| J{Resolved?}
+    
+    J -->|all agents pass| K[✅ APPROVED]
+    J -->|unresolvable after round 3| L[⚠️ ESCALATED to Executive]
+    J -->|unanimous hard reject| M[❌ REJECTED]
+    
+    K & L & M -->|immutable audit trail| N[Band Room Log]
 ```
 
-## 🚀 Deployment
+---
 
-Cordane is a clean monorepo. Frontend and backend deploy independently.
+## Consensus Mechanism — Veto + Bounded Rounds
 
-### Backend (Render)
-1. Push this repository to GitHub.
-2. Log in to [Render](https://dashboard.render.com/) → **New Web Service** → select this repo.
+Cordane's decision logic is deterministic, not probabilistic:
+
+1. **Any agent can veto** if a hard constraint is violated (uncapped liability, budget 3x+ over threshold, OFAC hit)
+2. **Agents negotiate for up to 3 rounds** — each round, agents read the full Band room history and post updated positions
+3. **If any hard veto remains after round 3** → Escalate to human with a precise breakdown of what's blocking and what each agent needs to resolve it
+4. **The human gets three options**: Approve Anyway / Reject / Send Back for Revision
+
+This guarantees Cordane never silently approves a dangerous contract and never hallucinates a compromise.
+
+---
+
+## The Three Demo Scenarios
+
+Each scenario is engineered to produce a genuinely different outcome — proving Cordane is a reasoning system, not a scripted demo:
+
+| Scenario | Contract Profile | Expected Outcome |
+|:---|:---|:---|
+| **A — Clean Approve** | Standard terms, budget within threshold, reliable vendor, realistic timeline | Agents reach consensus in round 1. Fast approval. |
+| **B — Clear Reject** | Uncapped liability, budget 4x over threshold, vendor has no track record | Legal and Risk veto in round 1. Escalate with reject recommendation. |
+| **C — Ambiguous** | One fixable clause, slightly over budget, mid-tier vendor | Round 2 negotiation. Conditional approval with one contract amendment. |
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|:---|:---|
+| Agent coordination | Band SDK (Python) — shared room, @mention routing, structured context |
+| Agent inference | AI/ML API — unified gateway for all four models |
+| Backend | Python 3.11 + FastAPI + Pydantic V2 |
+| Frontend | Next.js 14 + Tailwind CSS + Framer Motion |
+| Dark/Light mode | next-themes |
+| Deployment | Render (backend) + Vercel (frontend) |
+
+---
+
+## Project Structure
+
+```
+cordane/
+├── api/
+│   ├── server.py                        # FastAPI app + /api/negotiate endpoint
+│   ├── evaluators/
+│   │   ├── base.py                      # AI/ML API client, model routing
+│   │   └── tribunes.py                  # Four agent definitions + Band room posting
+│   └── orchestration/
+│       ├── mesh_state.py                # EnterpriseContextRegistry (Pydantic V2)
+│       ├── cordane_optimized_mesh.py    # Veto + bounded rounds orchestrator
+│       └── cordane_global_sentinel.py  # Pre-flight contract validation
+├── frontend/
+│   ├── src/app/
+│   │   ├── page.tsx                     # Landing page
+│   │   ├── platform/page.tsx           # Upload + negotiation room
+│   │   └── dashboard/page.tsx          # User dashboard
+│   └── process_logo.py                 # Logo processing utility
+├── render.yaml
+├── .env.example
+└── README.md
+```
+
+---
+
+## Local Setup
+
+### Prerequisites
+- Python 3.11+
+- Node.js 18+
+- AI/ML API key ([get one here](https://aimlapi.com))
+- Band SDK API key ([get one here](https://app.band.ai))
+
+### Backend
+
+```bash
+cd api
+pip install -r requirements.txt
+
+# .env
+AIML_API_KEY=your_key_here
+BAND_API_KEY=your_key_here
+
+uvicorn server:app --reload
+```
+
+### Frontend
+
+```bash
+cd frontend
+npm install
+
+# .env.local
+NEXT_PUBLIC_API_URL=http://localhost:8000
+
+npm run dev
+```
+
+---
+
+## Deployment
+
+### Backend → Render
+1. Create a new **Web Service** on [Render](https://render.com)
+2. Connect this repository
 3. **Build Command:** `cd api && pip install -r requirements.txt`
 4. **Start Command:** `cd api && uvicorn server:app --host 0.0.0.0 --port $PORT`
-5. Add Environment Variables: `AIML_API_KEY`, `BAND_API_KEY`.
+5. Add environment variables: `AIML_API_KEY`, `BAND_API_KEY`
 
-### Frontend (Vercel)
-1. Log in to [Vercel](https://vercel.com/) → import this repository.
-2. Set **Root Directory** to `frontend`.
-3. Add Environment Variable: `NEXT_PUBLIC_API_URL` → your live Render URL.
-4. Deploy. Vercel auto-detects Next.js.
+### Frontend → Vercel
+1. Import this repository on [Vercel](https://vercel.com)
+2. Set **Root Directory** to `frontend`
+3. Add environment variable: `NEXT_PUBLIC_API_URL` (your live Render URL)
+4. Deploy
 
-## 🛡️ Escalation Safety
+---
 
-When agents reach deadlock — Legal demands a $5M liability cap, Finance demands $10M — Cordane does not hallucinate a compromise. It does not silently approve. It surfaces the exact contested clauses side-by-side and flags the decision for human executive override. The entire debate is logged as an immutable audit trail.
+## Resilience & Safety
 
-**Autonomous AI should never silently approve a bad contract. Cordane guarantees it won't.**
+Cordane is built for regulated enterprise environments:
+
+- **No hallucinated compromises** — if agents can't agree, the system stops and escalates
+- **Immutable audit trail** — every agent decision, every negotiation round, every flag is stored in Band's room log and available for legal discovery
+- **Human-in-the-loop gate** — no contract is approved or rejected without the option for executive override
+- **Pydantic V2 validation** — every agent output is schema-validated before it affects the shared state; malformed outputs are rejected, not passed downstream
+
+---
+
+## Built By
+
+**Hillary Ikhais** — ML Engineer, CS student at FUPRE, Nigeria  
+Team **Stratum** · Band of Agents Hackathon 2026  
+[github.com/HillaryIkhais](https://github.com/HillaryIkhais)
+
+---
+
+<div align="center">
+  <p><i>Surface every risk. Resolve every conflict. Sign the right contracts.</i></p>
+  <p><b>Cordane.</b></p>
+</div>
