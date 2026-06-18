@@ -77,15 +77,46 @@ When looking at the Band room logs, you will see a real conversation: agents rea
 
 ```mermaid
 graph LR
-    A[Contract] --> B[Band Room]
-    B --> C[Legal]
-    B --> D[Finance]
-    B --> E[Risk]
-    B --> F[Ops]
-    C & D & E & F --> B
-    B --> G{Consensus?}
-    G -->|Yes| H[Approved]
-    G -->|No| I[Escalated]
+    %% Nodes
+    User((Executive))
+    Dashboard[Next.js Dashboard]
+    API{FastAPI Engine}
+    Room[(Band Shared Room)]
+    
+    subgraph Agents [Mixture of Experts]
+        L[Legal]
+        F[Finance]
+        R[Risk]
+        O[Ops]
+    end
+    
+    %% Data Flow
+    User -->|Contract| Dashboard
+    Dashboard --> API
+    API --> Room
+    
+    %% Agent Collaboration (Bidirectional)
+    Room <--> L
+    Room <--> F
+    Room <--> R
+    Room <--> O
+    
+    %% Decision
+    L & F & R & O --> Verdict{Consensus?}
+    Verdict -->|Unanimous| Pass[Approved]
+    Verdict -->|Deadlock| Esc[Escalated]
+
+    %% Brand Styling
+    style User fill:#1A1A1A,stroke:#333,color:#FFF
+    style Dashboard fill:#111,stroke:#444,color:#FFF
+    style API fill:#00AA66,stroke:#007744,color:#FFF
+    style Room fill:#0066FF,stroke:#0044BB,color:#FFF
+    style L fill:#2B2D42,stroke:#1A1A24,color:#FFF
+    style F fill:#2B2D42,stroke:#1A1A24,color:#FFF
+    style R fill:#2B2D42,stroke:#1A1A24,color:#FFF
+    style O fill:#2B2D42,stroke:#1A1A24,color:#FFF
+    style Pass fill:#276F4B,stroke:#15402A,color:#FFF
+    style Esc fill:#C8853A,stroke:#9A662C,color:#FFF
 ```
 
 ---
