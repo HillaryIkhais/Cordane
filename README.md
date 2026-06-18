@@ -41,13 +41,10 @@ They don't run in parallel and dump four separate reports. They react to each ot
 
 **Three possible outputs:**
 - **Approved** — agents reached consensus, full audit trail attached
-- **Rejected** — specific clause or constraint blocked consensus, exact reason surfaced  
-- **Escalated** — agents couldn't agree after 3 negotiation rounds; human gets a precise summary of exactly what's blocking and what each agent needs
-- **Approved** — agents reached consensus, full audit trail attached
 - **Rejected** — specific clause or constraint blocked consensus, exact reason surfaced
-- **Escalated** — agents couldn't agree after 3 negotiation rounds; human gets a precise summary of exactly what's blocking and what each agent needs
+- **Escalated** — agents couldn't agree after 3 rounds; human gets a precise summary of what's blocking and what each agent needs
 
-The executive doesn't wade through four reports. One verdict. One audit trail. One action.
+One verdict. One audit trail. One action.
 
 ---
 
@@ -55,10 +52,6 @@ The executive doesn't wade through four reports. One verdict. One audit trail. O
 
 | Agent | Model | Provider | Role |
 |:---|:---|:---|:---|
-| **Legal** | `claude-3-5-sonnet-20240620` | AI/ML API | Parses contract language, flags liability terms, data ownership clauses, indemnification risks |
-| **Finance** | `gpt-4o` | AI/ML API | Checks payment terms, cost thresholds, margin calculations, flags budget conflicts |
-| **Risk** | `deepseek-reasoner` | AI/ML API | Scores vendor reliability, flags concentration risk, OFAC/GDPR compliance gaps |
-| **Ops** | `meta-llama/Llama-3-70b-instruct` | AI/ML API | Assesses integration feasibility, timeline realism, team capacity blockers |
 | **Legal** | `claude-3-5-sonnet-20240620` | AI/ML API | Parses contract language, flags liability terms, data ownership clauses, indemnification risks |
 | **Finance** | `gpt-4o` | AI/ML API | Checks payment terms, cost thresholds, margin calculations, flags budget conflicts |
 | **Risk** | `deepseek-reasoner` | AI/ML API | Scores vendor reliability, flags concentration risk, OFAC/GDPR compliance gaps |
@@ -76,69 +69,47 @@ Most systems run agents in parallel, collect their outputs, and push a summary t
 
 In Cordane, **every agent-to-agent handoff goes through Band's shared room**. The Finance agent cannot set its budget threshold without reading what Legal posted. The Risk agent cannot calibrate its threat score without Finance's constraints. Band is not where results are reported — it's where the negotiation happens.
 
-When a judge looks at the Band room logs, they will see a real conversation: agents @mentioning each other, posting structured context, and changing their positions based on what they read. That's the collaboration criterion. Not simulated — demonstrated.
+When a judge looks at the Band room logs, they will see a real conversation: agents reading each other's context, posting structured responses, and changing their positions based on what they read. That's the collaboration criterion. Not simulated — demonstrated.
 
 ---
 
 ## System Architecture
 
 ```mermaid
-graph TD
-    A[Executive] -->|Uploads Contract| B(Cordane Dashboard)
-    B -->|REST API| C{FastAPI Orchestrator}
-    
-    C -->|mention triggers| D[Band Shared Room]
-    
-    D -->|reads shared context| E[Legal: Claude 3.5 Sonnet]
-    D -->|reads shared context| F[Finance: GPT-4o]
-    D -->|reads shared context| G[Risk: DeepSeek-Reasoner]
-    D -->|reads shared context| H[Ops: Llama 3 70B]
-    
-    E -->|posts clause flags| D
-    F -->|posts budget verdict| D
-    G -->|posts threat score| D
-    H -->|posts feasibility verdict| D
-    
-    D -->|full negotiation log| I{Consensus Evaluator}
-    
-    I -->|bounded rounds max 3| J{Resolved?}
-    
-    J -->|all agents pass| K[APPROVED]
-    J -->|unresolvable after round 3| L[ESCALATED]
-    J -->|unanimous hard reject| M[REJECTED]
-    J -->|all agents pass| K[APPROVED]
-    J -->|unresolvable after round 3| L[ESCALATED to Executive]
-    J -->|unanimous hard reject| M[REJECTED]
-    
-    K & L & M -->|audit trail| N[Band Room Log]
+graph LR
+    A[Contract] --> B[Band Room]
+    B --> C[Legal]
+    B --> D[Finance]
+    B --> E[Risk]
+    B --> F[Ops]
+    C & D & E & F --> B
+    B --> G{Consensus?}
+    G -->|Yes| H[Approved]
+    G -->|No| I[Escalated]
 ```
 
 ---
 
-## Consensus Mechanism
-## Consensus Mechanism
+## How Decisions Are Made
 
-Cordane's decision logic is deterministic, not probabilistic:
+1. Each agent reads the contract and the full Band room history before responding
+2. If any agent flags a hard constraint — uncapped liability, budget way over threshold, compliance failure — it blocks approval
+3. Agents get up to 3 rounds to negotiate and adjust their positions
+4. If a blocker remains after round 3, the system escalates to a human with a clear breakdown of what's stuck
+5. The human can approve anyway, reject, or send it back for revision
 
-1. **Any agent can veto** if a hard constraint is violated (uncapped liability, budget 3x+ over threshold, OFAC hit)
-2. **Agents negotiate for up to 3 rounds** — each round, agents read the full Band room history and post updated positions
-3. **If any hard veto remains after round 3** → escalate to human with a precise breakdown of what's blocking and what each agent needs to resolve it
-3. **If any hard veto remains after round 3** — escalate to human with a precise breakdown of what's blocking and what each agent needs to resolve it
-4. **The human gets three options**: Approve Anyway / Reject / Send Back for Revision
-
-This guarantees Cordane never silently approves a dangerous contract and never hallucinates a compromise.
+Cordane never silently approves a dangerous contract. It never hallucinates a compromise.
 
 ---
 
-## The Demo Scenarios
 ## Demo Scenarios
 
-Each scenario is engineered to produce a genuinely different outcome — proving Cordane is a reasoning system, not a scripted demo:
+Each scenario produces a genuinely different outcome — proving Cordane reasons, not scripts:
 
 | Scenario | Contract Profile | Expected Outcome |
 |:---|:---|:---|
 | **A — Clean Approve** | Standard terms, budget within threshold, reliable vendor, realistic timeline | Agents reach consensus in round 1. Fast approval. |
-| **B — Clear Reject** | Uncapped liability, budget 4x over threshold, vendor has no track record | Legal and Risk veto in round 1. Escalate with reject recommendation. |
+| **B — Clear Reject** | Uncapped liability, budget 4x over threshold, vendor has no track record | Legal and Risk block in round 1. Escalate with reject recommendation. |
 | **C — Ambiguous** | One fixable clause, slightly over budget, mid-tier vendor | Round 2 negotiation. Conditional approval with one contract amendment. |
 
 ---
@@ -147,11 +118,10 @@ Each scenario is engineered to produce a genuinely different outcome — proving
 
 | Layer | Technology |
 |:---|:---|
-| Agent coordination | Band SDK (Python) — shared room, @mention routing, structured context |
+| Agent coordination | Band SDK (Python) — shared room, structured context |
 | Agent inference | AI/ML API — unified gateway for all four models |
 | Backend | Python 3.11 + FastAPI + Pydantic V2 |
 | Frontend | Next.js 14 + Tailwind CSS + Framer Motion |
-| Dark/Light mode | next-themes |
 | Deployment | Render (backend) + Vercel (frontend) |
 
 ---
@@ -164,31 +134,23 @@ cordane/
 │   ├── server.py                        # FastAPI app + /api/negotiate endpoint
 │   ├── evaluators/
 │   │   ├── base.py                      # AI/ML API client, model routing
-│   │   └── tribunes.py                  # Four agent definitions + Band room posting
+│   │   └── tribunes.py                  # Agent definitions + Band room posting
 │   └── orchestration/
-│       ├── mesh_state.py                # EnterpriseContextRegistry (Pydantic V2)
-│       ├── cordane_optimized_mesh.py    # Veto + bounded rounds orchestrator
+│       ├── mesh_state.py                # Shared state registry
+│       ├── cordane_optimized_mesh.py    # Negotiation rounds orchestrator
 │       └── cordane_global_sentinel.py   # Pre-flight contract validation
 ├── frontend/
 │   ├── src/app/
 │   │   ├── page.tsx                     # Landing page
-│   │   ├── platform/page.tsx            # Upload + negotiation room
+│   │   ├── platform/page.tsx            # Negotiation room
 │   │   └── dashboard/page.tsx           # User dashboard
-│   └── process_logo.py                  # Logo processing utility
 ├── render.yaml
-├── .env.example
 └── README.md
 ```
 
 ---
 
 ## Local Setup
-
-### Prerequisites
-- Python 3.11+
-- Node.js 18+
-- AI/ML API key ([get one here](https://aimlapi.com))
-- Band SDK API key ([get one here](https://app.band.ai))
 
 ### Backend
 
@@ -217,37 +179,8 @@ npm run dev
 
 ---
 
-## Deployment
-
-### Backend → Render
-1. Create a new **Web Service** on [Render](https://render.com)
-2. Connect this repository
-3. **Build Command:** `cd api && pip install -r requirements.txt`
-4. **Start Command:** `cd api && uvicorn server:app --host 0.0.0.0 --port $PORT`
-5. Add environment variables: `AIML_API_KEY`, `BAND_API_KEY`
-
-### Frontend → Vercel
-1. Import this repository on [Vercel](https://vercel.com)
-2. Set **Root Directory** to `frontend`
-3. Add environment variable: `NEXT_PUBLIC_API_URL` (your live Render URL)
-4. Deploy
-
----
-
-## Resilience & Safety
-
-Cordane is built for regulated enterprise environments:
-
-- **No hallucinated compromises** — if agents can't agree, the system stops and escalates
-- **Immutable audit trail** — every agent decision, every negotiation round, every flag is stored in Band's room log and available for legal discovery
-- **Human-in-the-loop gate** — no contract is approved or rejected without the option for executive override
-- **Pydantic V2 validation** — every agent output is schema-validated before it affects the shared state; malformed outputs are rejected, not passed downstream
-
----
-
 ## Built By
 
-Team **Stratum** · Band of Agents Hackathon 2026  
 **Hillary Ikhais** — ML Engineer, CS student at FUPRE, Nigeria
 Team **Stratum** · Band of Agents Hackathon 2026
 [github.com/HillaryIkhais](https://github.com/HillaryIkhais)
