@@ -24,14 +24,14 @@ export default function VerdictsPage() {
         
         <div className="flex items-center gap-4">
           <div className="relative group">
-            <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-white/40 group-focus-within:text-[#cc8b45] transition-colors" />
+            <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-foreground/40 group-focus-within:text-[#cc8b45] transition-colors" />
             <input 
               type="text" 
               placeholder="Search contracts..." 
-              className="bg-black/40 border border-white/10 rounded-full py-2.5 pl-11 pr-6 text-sm focus:outline-none focus:border-[#cc8b45]/50 focus:ring-1 focus:ring-[#cc8b45]/50 transition-all w-64"
+              className="bg-foreground/5 border border-foreground/10 rounded-full py-2.5 pl-11 pr-6 text-sm focus:outline-none focus:border-[#cc8b45]/50 focus:ring-1 focus:ring-[#cc8b45]/50 transition-all w-64"
             />
           </div>
-          <button className="flex items-center justify-center w-10 h-10 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
+          <button className="flex items-center justify-center w-10 h-10 rounded-full bg-foreground/5 border border-foreground/10 hover:bg-foreground/10 transition-colors">
             <Filter className="w-4 h-4" />
           </button>
         </div>
@@ -40,9 +40,9 @@ export default function VerdictsPage() {
       {/* Filters */}
       <div className="flex items-center gap-3 border-b border-border/50 pb-6">
         <button className="px-5 py-2 rounded-full bg-[#cc8b45] text-black text-xs font-bold uppercase tracking-widest">All</button>
-        <button className="px-5 py-2 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 text-xs font-bold uppercase tracking-widest transition-colors">Approved</button>
-        <button className="px-5 py-2 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 text-xs font-bold uppercase tracking-widest transition-colors">Escalated</button>
-        <button className="px-5 py-2 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 text-xs font-bold uppercase tracking-widest transition-colors">Rejected</button>
+        <button className="px-5 py-2 rounded-full bg-foreground/5 border border-foreground/10 hover:bg-foreground/10 text-xs font-bold uppercase tracking-widest transition-colors">Approved</button>
+        <button className="px-5 py-2 rounded-full bg-foreground/5 border border-foreground/10 hover:bg-foreground/10 text-xs font-bold uppercase tracking-widest transition-colors">Escalated</button>
+        <button className="px-5 py-2 rounded-full bg-foreground/5 border border-foreground/10 hover:bg-foreground/10 text-xs font-bold uppercase tracking-widest transition-colors">Rejected</button>
       </div>
 
       {/* Main Table */}
@@ -51,7 +51,7 @@ export default function VerdictsPage() {
 
         <table className="w-full text-left border-collapse relative z-10">
           <thead>
-            <tr className="border-b border-white/10 text-[10px] uppercase tracking-widest opacity-50 bg-black/20">
+            <tr className="border-b border-foreground/10 text-[10px] uppercase tracking-widest opacity-50 bg-foreground/5">
               <th className="py-4 px-6 font-medium">Review ID</th>
               <th className="py-4 px-6 font-medium">Contract / Vendor</th>
               <th className="py-4 px-6 font-medium">Date</th>
@@ -63,13 +63,13 @@ export default function VerdictsPage() {
           </thead>
           <tbody>
             {VERDICTS.map((v, i) => (
-              <tr key={i} className="border-b border-white/5 hover:bg-white/5 transition-colors group cursor-pointer">
+              <tr key={i} className="border-b border-foreground/5 hover:bg-foreground/5 transition-colors group cursor-pointer">
                 <td className="py-5 px-6 font-mono text-sm opacity-70">{v.id}</td>
                 <td className="py-5 px-6 font-medium">{v.vendor}</td>
                 <td className="py-5 px-6 font-mono text-sm opacity-60">{v.date}</td>
                 <td className="py-5 px-6 font-mono text-sm opacity-60">{v.time}</td>
                 <td className="py-5 px-6">
-                  <span className="font-mono text-sm bg-white/5 px-2 py-1 rounded border border-white/10">{v.score}/100</span>
+                  <span className="font-mono text-sm bg-foreground/5 px-2 py-1 rounded border border-foreground/10">{v.score}/100</span>
                 </td>
                 <td className="py-5 px-6">
                   <span className={`text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full border ${

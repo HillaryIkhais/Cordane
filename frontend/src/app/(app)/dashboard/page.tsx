@@ -17,7 +17,7 @@ export default function DashboardPage() {
       
       <header className="flex justify-between items-end md:hidden mb-8">
         <Link href="/" className="font-serif text-2xl tracking-tight text-foreground/90">Cordane.</Link>
-        <Link href="/platform" className="text-[#cc8b45] text-sm font-bold uppercase tracking-wider">New Review &rarr;</Link>
+        <Link href="/upload" className="text-[#cc8b45] text-sm font-bold uppercase tracking-wider">New Review &rarr;</Link>
       </header>
 
       {/* ZONE 1: ATTENTION BANNER */}
@@ -46,7 +46,7 @@ export default function DashboardPage() {
       <section>
         <div className="flex justify-between items-end mb-6">
           <h2 className="font-serif text-3xl">Active Mesh Computations</h2>
-          <Link href="/platform">
+          <Link href="/upload">
             <button className="hidden md:flex items-center gap-2 px-5 py-2.5 bg-[#cc8b45] hover:bg-[#b57a3c] text-black rounded-md text-xs font-bold uppercase tracking-wider transition-colors shadow-lg shadow-[#cc8b45]/20">
               <Plus className="w-4 h-4" /> New Review
             </button>
@@ -68,31 +68,31 @@ export default function DashboardPage() {
                   <p className="text-xs font-mono uppercase tracking-widest opacity-50 mt-1">Salesforce Inc.</p>
                 </div>
               </div>
-              <span className="flex items-center gap-1.5 text-xs font-mono bg-white/5 px-2.5 py-1.5 rounded-md border border-white/10">
+              <span className="flex items-center gap-1.5 text-xs font-mono bg-foreground/5 px-2.5 py-1.5 rounded-md border border-foreground/10">
                 <Clock className="w-3.5 h-3.5 text-[#cc8b45] animate-pulse" /> 01:24
               </span>
             </div>
             
-            <div className="grid grid-cols-4 gap-3 mb-8 bg-black/20 p-4 rounded-lg border border-white/5">
+            <div className="grid grid-cols-4 gap-3 mb-8 bg-foreground/5 p-4 rounded-lg border border-foreground/5">
               {["LGL", "FIN", "RSK", "OPS"].map(role => (
                 <div key={role} className="flex flex-col items-center gap-2">
-                  <div className={`w-3 h-3 rounded-full ${role === 'FIN' || role === 'LGL' ? 'bg-[#cc8b45] animate-pulse shadow-[0_0_15px_rgba(204,139,69,0.6)]' : 'bg-white/10'}`}></div>
+                  <div className={`w-3 h-3 rounded-full ${role === 'FIN' || role === 'LGL' ? 'bg-[#cc8b45] animate-pulse shadow-[0_0_15px_rgba(204,139,69,0.6)]' : 'bg-foreground/10'}`}></div>
                   <span className={`text-[10px] font-mono ${role === 'FIN' || role === 'LGL' ? 'opacity-100 text-[#cc8b45]' : 'opacity-40'}`}>{role}</span>
                 </div>
               ))}
             </div>
 
-            <Link href="/platform">
-              <button className="w-full py-3 border border-[#cc8b45]/30 text-[#cc8b45] text-xs font-bold uppercase tracking-wider rounded-md hover:bg-[#cc8b45]/10 hover:border-[#cc8b45]/50 transition-all">
-                Enter Room &rarr;
+            <Link href="/upload">
+              <button className="flex items-center gap-2 px-4 py-2 bg-foreground/5 border border-foreground/10 text-xs font-bold uppercase tracking-widest rounded-md hover:bg-foreground/10 hover:border-foreground/20 transition-all text-foreground">
+                <Plus className="w-4 h-4" /> New Review
               </button>
             </Link>
           </div>
 
           {/* Empty State Card */}
           <div className="bg-background/20 backdrop-blur-sm border-2 border-dashed border-border/50 rounded-xl p-8 flex flex-col items-center justify-center text-center gap-5 min-h-[250px] hover:bg-background/40 hover:border-[#cc8b45]/30 transition-all cursor-pointer group">
-            <div className="p-4 bg-white/5 rounded-full group-hover:bg-[#cc8b45]/10 transition-colors">
-              <Plus className="w-6 h-6 text-white/40 group-hover:text-[#cc8b45] transition-colors" />
+            <div className="p-4 bg-foreground/5 rounded-full group-hover:bg-[#cc8b45]/10 transition-colors">
+              <Plus className="w-6 h-6 text-foreground/40 group-hover:text-[#cc8b45] transition-colors" />
             </div>
             <div>
               <h3 className="font-serif text-lg mb-1">Upload Contract</h3>
@@ -109,7 +109,7 @@ export default function DashboardPage() {
         <div className="bg-background/60 backdrop-blur-xl border border-border/50 rounded-xl overflow-hidden shadow-2xl">
           <table className="w-full text-left text-sm">
             <thead>
-              <tr className="border-b border-white/5 bg-black/20">
+              <tr className="border-b border-foreground/5 bg-foreground/5">
                 <th className="px-6 py-5 font-mono text-[10px] uppercase tracking-widest opacity-50 font-normal">Contract</th>
                 <th className="px-6 py-5 font-mono text-[10px] uppercase tracking-widest opacity-50 font-normal hidden sm:table-cell">Vendor</th>
                 <th className="px-6 py-5 font-mono text-[10px] uppercase tracking-widest opacity-50 font-normal">Verdict</th>
@@ -119,7 +119,7 @@ export default function DashboardPage() {
             </thead>
             <tbody>
               {RECENT_VERDICTS.map((v) => (
-                <tr key={v.id} className="border-b border-white/5 hover:bg-white/5 transition-colors group">
+                <tr key={v.id} className="border-b border-foreground/5 hover:bg-foreground/5 transition-colors group">
                   <td className="px-6 py-5 font-sans font-medium text-foreground/90">{v.contract}</td>
                   <td className="px-6 py-5 font-mono text-xs opacity-60 hidden sm:table-cell">{v.vendor}</td>
                   <td className="px-6 py-5">
@@ -130,7 +130,7 @@ export default function DashboardPage() {
                   <td className="px-6 py-5 opacity-50 hidden md:table-cell font-mono text-xs">{v.date}</td>
                   <td className="px-6 py-5 text-right">
                     <Link href="/platform">
-                      <button className={`text-[10px] font-bold uppercase tracking-widest px-4 py-2 rounded-md transition-all ${v.action === "Decide" ? "bg-amber-500/10 text-amber-500 hover:bg-amber-500/20" : "bg-white/5 text-foreground/50 hover:bg-white/10 hover:text-foreground"}`}>
+                      <button className={`text-[10px] font-bold uppercase tracking-widest px-4 py-2 rounded-md transition-all ${v.action === "Decide" ? "bg-amber-500/10 text-amber-500 hover:bg-amber-500/20" : "bg-foreground/5 text-foreground/50 hover:bg-foreground/10 hover:text-foreground"}`}>
                         {v.action}
                       </button>
                     </Link>
@@ -139,7 +139,7 @@ export default function DashboardPage() {
               ))}
             </tbody>
           </table>
-          <div className="p-4 bg-black/20 flex justify-center">
+          <div className="p-4 bg-foreground/5 flex justify-center">
             <button className="text-[10px] font-mono uppercase tracking-widest opacity-40 hover:opacity-100 transition-opacity flex items-center gap-2">
               Load More <ArrowRight className="w-3 h-3" />
             </button>

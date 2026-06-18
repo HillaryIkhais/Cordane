@@ -15,28 +15,28 @@ export default function SettingsPage() {
         
         <button 
           onClick={() => setActiveTab("profile")}
-          className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${activeTab === "profile" ? "bg-[#cc8b45]/10 text-[#cc8b45] border border-[#cc8b45]/30 shadow-[0_0_15px_rgba(204,139,69,0.2)]" : "text-white/60 hover:bg-white/5 hover:text-white"}`}
+          className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${activeTab === "profile" ? "bg-[#cc8b45]/10 text-[#cc8b45] border border-[#cc8b45]/30 shadow-[0_0_15px_rgba(204,139,69,0.2)]" : "text-foreground/60 hover:bg-foreground/5 hover:text-foreground"}`}
         >
           <User className="w-4 h-4" /> Profile
         </button>
         
         <button 
           onClick={() => setActiveTab("mesh")}
-          className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${activeTab === "mesh" ? "bg-[#cc8b45]/10 text-[#cc8b45] border border-[#cc8b45]/30 shadow-[0_0_15px_rgba(204,139,69,0.2)]" : "text-white/60 hover:bg-white/5 hover:text-white"}`}
+          className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${activeTab === "mesh" ? "bg-[#cc8b45]/10 text-[#cc8b45] border border-[#cc8b45]/30 shadow-[0_0_15px_rgba(204,139,69,0.2)]" : "text-foreground/60 hover:bg-foreground/5 hover:text-foreground"}`}
         >
           <Settings2 className="w-4 h-4" /> Mesh Configuration
         </button>
 
         <button 
           onClick={() => setActiveTab("api")}
-          className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${activeTab === "api" ? "bg-[#cc8b45]/10 text-[#cc8b45] border border-[#cc8b45]/30 shadow-[0_0_15px_rgba(204,139,69,0.2)]" : "text-white/60 hover:bg-white/5 hover:text-white"}`}
+          className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${activeTab === "api" ? "bg-[#cc8b45]/10 text-[#cc8b45] border border-[#cc8b45]/30 shadow-[0_0_15px_rgba(204,139,69,0.2)]" : "text-foreground/60 hover:bg-foreground/5 hover:text-foreground"}`}
         >
           <Key className="w-4 h-4" /> API Keys
         </button>
         
         <button 
           onClick={() => setActiveTab("billing")}
-          className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${activeTab === "billing" ? "bg-[#cc8b45]/10 text-[#cc8b45] border border-[#cc8b45]/30 shadow-[0_0_15px_rgba(204,139,69,0.2)]" : "text-white/60 hover:bg-white/5 hover:text-white"}`}
+          className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${activeTab === "billing" ? "bg-[#cc8b45]/10 text-[#cc8b45] border border-[#cc8b45]/30 shadow-[0_0_15px_rgba(204,139,69,0.2)]" : "text-foreground/60 hover:bg-foreground/5 hover:text-foreground"}`}
         >
           <CreditCard className="w-4 h-4" /> Billing
         </button>
@@ -56,7 +56,7 @@ export default function SettingsPage() {
               {/* Agent 1 */}
               <div className="bg-background/40 backdrop-blur-xl border border-border/50 rounded-2xl p-6 flex flex-col sm:flex-row gap-6 items-start sm:items-center justify-between shadow-xl">
                 <div className="flex items-center gap-4">
-                  <div className="p-3 bg-white/5 rounded-xl border border-white/10">
+                  <div className="p-3 bg-foreground/5 rounded-xl border border-foreground/10">
                     <Scale className="w-6 h-6 text-[#cc8b45]" />
                   </div>
                   <div>
@@ -65,7 +65,7 @@ export default function SettingsPage() {
                   </div>
                 </div>
                 <div className="w-full sm:w-64">
-                  <select className="w-full bg-black/40 border border-white/10 rounded-lg py-2.5 px-4 text-sm focus:outline-none focus:border-[#cc8b45]/50 focus:ring-1 focus:ring-[#cc8b45]/50 appearance-none text-foreground">
+                  <select className="w-full bg-foreground/5 border border-foreground/10 rounded-lg py-2.5 px-4 text-sm focus:outline-none focus:border-[#cc8b45]/50 focus:ring-1 focus:ring-[#cc8b45]/50 appearance-none text-foreground">
                     <option value="claude">Claude Sonnet 4.6 (AI/ML API)</option>
                     <option value="gpt4">GPT-4o (OpenAI)</option>
                     <option value="gemini">Gemini 1.5 Pro (Google)</option>
@@ -76,7 +76,7 @@ export default function SettingsPage() {
               {/* Agent 2 */}
               <div className="bg-background/40 backdrop-blur-xl border border-border/50 rounded-2xl p-6 flex flex-col sm:flex-row gap-6 items-start sm:items-center justify-between shadow-xl">
                 <div className="flex items-center gap-4">
-                  <div className="p-3 bg-white/5 rounded-xl border border-white/10">
+                  <div className="p-3 bg-foreground/5 rounded-xl border border-foreground/10">
                     <Calculator className="w-6 h-6 text-[#cc8b45]" />
                   </div>
                   <div>
@@ -85,7 +85,7 @@ export default function SettingsPage() {
                   </div>
                 </div>
                 <div className="w-full sm:w-64">
-                  <select className="w-full bg-black/40 border border-white/10 rounded-lg py-2.5 px-4 text-sm focus:outline-none focus:border-[#cc8b45]/50 focus:ring-1 focus:ring-[#cc8b45]/50 appearance-none text-foreground">
+                  <select className="w-full bg-foreground/5 border border-foreground/10 rounded-lg py-2.5 px-4 text-sm focus:outline-none focus:border-[#cc8b45]/50 focus:ring-1 focus:ring-[#cc8b45]/50 appearance-none text-foreground">
                     <option value="qwq">QwQ-32B (Featherless AI)</option>
                     <option value="claude">Claude Sonnet 4.6 (AI/ML API)</option>
                     <option value="deepseek">DeepSeek-Coder (Featherless AI)</option>
@@ -96,7 +96,7 @@ export default function SettingsPage() {
               {/* Agent 3 */}
               <div className="bg-background/40 backdrop-blur-xl border border-border/50 rounded-2xl p-6 flex flex-col sm:flex-row gap-6 items-start sm:items-center justify-between shadow-xl">
                 <div className="flex items-center gap-4">
-                  <div className="p-3 bg-white/5 rounded-xl border border-white/10">
+                  <div className="p-3 bg-foreground/5 rounded-xl border border-foreground/10">
                     <Shield className="w-6 h-6 text-[#cc8b45]" />
                   </div>
                   <div>
@@ -105,7 +105,7 @@ export default function SettingsPage() {
                   </div>
                 </div>
                 <div className="w-full sm:w-64">
-                  <select className="w-full bg-black/40 border border-white/10 rounded-lg py-2.5 px-4 text-sm focus:outline-none focus:border-[#cc8b45]/50 focus:ring-1 focus:ring-[#cc8b45]/50 appearance-none text-foreground">
+                  <select className="w-full bg-foreground/5 border border-foreground/10 rounded-lg py-2.5 px-4 text-sm focus:outline-none focus:border-[#cc8b45]/50 focus:ring-1 focus:ring-[#cc8b45]/50 appearance-none text-foreground">
                     <option value="deepseek">DeepSeek-R1 (Featherless AI)</option>
                     <option value="gpt4">GPT-4o (OpenAI)</option>
                     <option value="claude">Claude Opus (AI/ML API)</option>
@@ -116,7 +116,7 @@ export default function SettingsPage() {
               {/* Agent 4 */}
               <div className="bg-background/40 backdrop-blur-xl border border-border/50 rounded-2xl p-6 flex flex-col sm:flex-row gap-6 items-start sm:items-center justify-between shadow-xl">
                 <div className="flex items-center gap-4">
-                  <div className="p-3 bg-white/5 rounded-xl border border-white/10">
+                  <div className="p-3 bg-foreground/5 rounded-xl border border-foreground/10">
                     <Settings className="w-6 h-6 text-[#cc8b45]" />
                   </div>
                   <div>
@@ -125,7 +125,7 @@ export default function SettingsPage() {
                   </div>
                 </div>
                 <div className="w-full sm:w-64">
-                  <select className="w-full bg-black/40 border border-white/10 rounded-lg py-2.5 px-4 text-sm focus:outline-none focus:border-[#cc8b45]/50 focus:ring-1 focus:ring-[#cc8b45]/50 appearance-none text-foreground">
+                  <select className="w-full bg-foreground/5 border border-foreground/10 rounded-lg py-2.5 px-4 text-sm focus:outline-none focus:border-[#cc8b45]/50 focus:ring-1 focus:ring-[#cc8b45]/50 appearance-none text-foreground">
                     <option value="qwen">Qwen3-235B-A22B (Featherless AI)</option>
                     <option value="llama3">Llama 3 70B (Featherless AI)</option>
                     <option value="mixtral">Mixtral 8x22B (Featherless AI)</option>
@@ -145,9 +145,9 @@ export default function SettingsPage() {
         )}
 
         {activeTab !== "mesh" && (
-          <div className="animate-in fade-in flex flex-col items-center justify-center h-[60vh] text-center border-2 border-dashed border-white/5 rounded-3xl bg-background/20">
-            <div className="p-4 bg-white/5 rounded-full mb-4">
-              <Lock className="w-8 h-8 text-white/40" />
+          <div className="animate-in fade-in flex flex-col items-center justify-center h-[60vh] text-center border-2 border-dashed border-foreground/5 rounded-3xl bg-background/20">
+            <div className="p-4 bg-foreground/5 rounded-full mb-4">
+              <Lock className="w-8 h-8 text-foreground/40" />
             </div>
             <h2 className="font-serif text-2xl mb-2">Development Preview</h2>
             <p className="opacity-60 text-sm max-w-sm">The {activeTab} settings are currently locked in this preview environment.</p>
