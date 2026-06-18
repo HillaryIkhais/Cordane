@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 
 load_dotenv(os.path.join(os.path.dirname(__file__), ".env"))
 
-from .evaluators.tribunes import execute_mesh_graph
+from evaluators.tribunes import execute_mesh_graph
 
 app = FastAPI()
 

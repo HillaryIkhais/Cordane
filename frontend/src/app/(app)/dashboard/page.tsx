@@ -14,27 +14,39 @@ export default function DashboardPage() {
     const fetchDashboardData = async () => {
       try {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-        // Attempt to fetch real data
-        const [verdictsRes, activeRes] = await Promise.allSettled([
-          fetch(`${apiUrl}/api/verdicts`),
-          fetch(`${apiUrl}/api/active_computations`)
-        ]);
+        // The backend only has /api/scenarios.
+        const res = await fetch(`${apiUrl}/api/scenarios`);
 
-        if (verdictsRes.status === 'fulfilled' && verdictsRes.value.ok) {
-          const vData = await verdictsRes.value.json();
-          setVerdicts(Array.isArray(vData) ? vData : []);
-        } else {
-          setVerdicts([]);
-        }
+        if (res.ok) {
+          const data = await res.json();
+          const scenarios = Array.isArray(data) ? data : [];
+          
+          // Split scenarios into active and verdicts for the dashboard
+          const active = scenarios.slice(0, 2).map((s: any) => ({
+            id: s.id,
+            contract: s.title,
+            vendor: s.vendor || "External",
+            elapsed: "00:00"
+          }));
+          
+          const history = scenarios.slice(2).map((s: any) => ({
+            id: s.id,
+            contract: s.title,
+            vendor: s.vendor || "External",
+            status: s.status === "Ready" ? "Approved" : s.status,
+            date: s.date
+          }));
 
-        if (activeRes.status === 'fulfilled' && activeRes.value.ok) {
-          const aData = await activeRes.value.json();
-          setActiveComputations(Array.isArray(aData) ? aData : []);
+          setActiveComputations(active);
+          setVerdicts(history);
         } else {
           setActiveComputations([]);
+          setVerdicts([]);
         }
       } catch (err) {
         console.error("Failed to fetch dashboard data:", err);
+        setActiveComputations([]);
+        setVerdicts([]);
       } finally {
         setIsLoading(false);
       }

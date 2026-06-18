@@ -3,9 +3,9 @@ import os
 import os
 from .base import BaseAgent
 from .band_adapter import BandRoomAdapter
-from ..orchestration.mesh_state import EnterpriseContextRegistry, AgentOutput
-from ..orchestration.cordane_global_sentinel import GlobalRiskRegistry, run_global_procurement_mesh
-from ..orchestration.cordane_optimized_mesh import ContractMeshState, ModelRoutingConfig, process_mesh_negotiation
+from orchestration.mesh_state import EnterpriseContextRegistry, AgentOutput
+from orchestration.cordane_global_sentinel import GlobalRiskRegistry, run_global_procurement_mesh
+from orchestration.cordane_optimized_mesh import ContractMeshState, ModelRoutingConfig, process_mesh_negotiation
 
 # Initialize the real LLM agents for hybrid execution
 _shared_room = BandRoomAdapter()

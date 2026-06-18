@@ -98,15 +98,11 @@ export default function PlatformPage() {
 
     } catch (error) {
       console.error("Backend Error:", error);
-      // Fallback if the backend isn't reachable yet
+      // Removed hardcoded fallback; show actual error state
       setTranscript([
-         { role: "SYSTEM", content: "Connection to backend failed. Please ensure your Render backend is deployed and NEXT_PUBLIC_API_URL is set in Vercel." },
-         { role: "LGL", content: "Scanning document for liability caps. Identifying uncapped indemnity clause in section 4." },
-         { role: "FIN", content: "Calculating margin risk. Uncapped liability threatens Q3 projected margins." },
-         { role: "RSK", content: "Risk elevated. Missing data processing agreements." },
-         { role: "OPS", content: "SLA obligations are vague. Requesting 30-day remedy period." },
+         { role: "SYSTEM", content: "CRITICAL FAILURE: Connection to the active AI Mesh backend failed. Ensure Render backend is running and NEXT_PUBLIC_API_URL is properly configured." }
       ]);
-      setVerdict("ESCALATED");
+      setVerdict("REJECTED");
     } finally {
       setIsFetching(false);
     }

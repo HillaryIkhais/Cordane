@@ -15,10 +15,18 @@ export default function VerdictsPage() {
     const fetchVerdicts = async () => {
       try {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-        const res = await fetch(`${apiUrl}/api/verdicts`);
+        const res = await fetch(`${apiUrl}/api/scenarios`);
         if (res.ok) {
           const data = await res.json();
-          setVerdicts(Array.isArray(data) ? data : []);
+          // Map scenarios to the verdicts table structure
+          const formattedData = Array.isArray(data) ? data.map((s: any) => ({
+            id: s.id,
+            contract: s.title,
+            vendor: s.vendor || "External",
+            status: s.status === "Ready" ? "Approved" : s.status, // Fallback mapping for demo
+            date: s.date
+          })) : [];
+          setVerdicts(formattedData);
         } else {
           setVerdicts([]);
         }
