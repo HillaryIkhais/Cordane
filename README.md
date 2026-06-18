@@ -40,9 +40,9 @@ You submit a vendor contract. Four specialized AI agents read it simultaneously,
 They don't run in parallel and dump four separate reports. They react to each other. When Legal flags an uncapped liability clause, Risk reads it and elevates its threat score. When Finance recalculates the budget threshold, Ops adjusts its integration assessment. The dependencies are real, not theatrical.
 
 **Three possible outputs:**
-- ✅ **Approved** — agents reached consensus, full audit trail attached
-- ❌ **Rejected** — specific clause or constraint blocked consensus, exact reason surfaced  
-- ⚠️ **Escalated** — agents couldn't agree after 3 negotiation rounds; human gets a precise summary of exactly what's blocking and what each agent needs
+- **Approved** — agents reached consensus, full audit trail attached
+- **Rejected** — specific clause or constraint blocked consensus, exact reason surfaced  
+- **Escalated** — agents couldn't agree after 3 negotiation rounds; human gets a precise summary of exactly what's blocking and what each agent needs
 
 The executive doesn't wade through four reports. One verdict. One audit trail. One action.
 
@@ -52,10 +52,10 @@ The executive doesn't wade through four reports. One verdict. One audit trail. O
 
 | Agent | Model | Provider | Role |
 |:---|:---|:---|:---|
-| ⚖️ **Legal** | `claude-3-5-sonnet-20240620` | AI/ML API | Parses contract language, flags liability terms, data ownership clauses, indemnification risks |
-| 💰 **Finance** | `gpt-4o` | AI/ML API | Checks payment terms, cost thresholds, margin calculations, flags budget conflicts |
-| 🛡️ **Risk** | `deepseek-reasoner` | AI/ML API | Scores vendor reliability, flags concentration risk, OFAC/GDPR compliance gaps |
-| ⚙️ **Ops** | `meta-llama/Llama-3-70b-instruct` | AI/ML API | Assesses integration feasibility, timeline realism, team capacity blockers |
+| **Legal** | `claude-3-5-sonnet-20240620` | AI/ML API | Parses contract language, flags liability terms, data ownership clauses, indemnification risks |
+| **Finance** | `gpt-4o` | AI/ML API | Checks payment terms, cost thresholds, margin calculations, flags budget conflicts |
+| **Risk** | `deepseek-reasoner` | AI/ML API | Scores vendor reliability, flags concentration risk, OFAC/GDPR compliance gaps |
+| **Ops** | `meta-llama/Llama-3-70b-instruct` | AI/ML API | Assesses integration feasibility, timeline realism, team capacity blockers |
 
 Each model was selected for the specific cognitive task of that agent — not by popularity. Claude leads every legal benchmark for clause identification and ambiguous language interpretation. GPT-4o handles numerical precision. DeepSeek-Reasoner is built for chain-of-thought multi-factor scoring. Llama 3 70B handles practical operational reasoning at speed.
 
@@ -96,29 +96,29 @@ graph TD
     
     I -->|veto + bounded rounds max 3| J{Resolved?}
     
-    J -->|all agents pass| K[✅ APPROVED]
-    J -->|unresolvable after round 3| L[⚠️ ESCALATED to Executive]
-    J -->|unanimous hard reject| M[❌ REJECTED]
+    J -->|all agents pass| K[APPROVED]
+    J -->|unresolvable after round 3| L[ESCALATED to Executive]
+    J -->|unanimous hard reject| M[REJECTED]
     
     K & L & M -->|immutable audit trail| N[Band Room Log]
 ```
 
 ---
 
-## Consensus Mechanism — Veto + Bounded Rounds
+## Consensus Mechanism
 
 Cordane's decision logic is deterministic, not probabilistic:
 
 1. **Any agent can veto** if a hard constraint is violated (uncapped liability, budget 3x+ over threshold, OFAC hit)
 2. **Agents negotiate for up to 3 rounds** — each round, agents read the full Band room history and post updated positions
-3. **If any hard veto remains after round 3** → Escalate to human with a precise breakdown of what's blocking and what each agent needs to resolve it
+3. **If any hard veto remains after round 3** → escalate to human with a precise breakdown of what's blocking and what each agent needs to resolve it
 4. **The human gets three options**: Approve Anyway / Reject / Send Back for Revision
 
 This guarantees Cordane never silently approves a dangerous contract and never hallucinates a compromise.
 
 ---
 
-## The Three Demo Scenarios
+## The Demo Scenarios
 
 Each scenario is engineered to produce a genuinely different outcome — proving Cordane is a reasoning system, not a scripted demo:
 
@@ -234,7 +234,6 @@ Cordane is built for regulated enterprise environments:
 
 ## Built By
 
-**Hillary Ikhais** — ML Engineer, CS student at FUPRE, Nigeria  
 Team **Stratum** · Band of Agents Hackathon 2026  
 [github.com/HillaryIkhais](https://github.com/HillaryIkhais)
 
