@@ -75,6 +75,10 @@ When looking at the Band room logs, you will see a real conversation: agents rea
 
 ## System Architecture
 
+<<<<<<< HEAD
+=======
+![System Architecture](./frontend/public/system_architecture.png)
+>>>>>>> 3255ff3a (Added architecture diagram)
 
 
 ---
