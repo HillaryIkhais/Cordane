@@ -87,30 +87,30 @@ graph TD
     A[Executive] -->|Uploads Contract| B(Cordane Dashboard)
     B -->|REST API| C{FastAPI Orchestrator}
     
-    C -->|@mention triggers| D[Band Shared Room]
+    C -->|mention triggers| D[Band Shared Room]
     
     D -->|reads shared context| E[Legal: Claude 3.5 Sonnet]
     D -->|reads shared context| F[Finance: GPT-4o]
     D -->|reads shared context| G[Risk: DeepSeek-Reasoner]
     D -->|reads shared context| H[Ops: Llama 3 70B]
     
-    E -->|posts clause flags + risk scalar| D
-    F -->|posts budget threshold + payment verdict| D
-    G -->|posts threat score + compliance flags| D
-    H -->|posts feasibility verdict + timeline| D
+    E -->|posts clause flags| D
+    F -->|posts budget verdict| D
+    G -->|posts threat score| D
+    H -->|posts feasibility verdict| D
     
     D -->|full negotiation log| I{Consensus Evaluator}
     
-    I -->|veto + bounded rounds max 3| J{Resolved?}
+    I -->|bounded rounds max 3| J{Resolved?}
     
     J -->|all agents pass| K[APPROVED]
-    J -->|unresolvable after round 3| L[ESCALATED to Executive]
+    J -->|unresolvable after round 3| L[ESCALATED]
     J -->|unanimous hard reject| M[REJECTED]
     J -->|all agents pass| K[APPROVED]
     J -->|unresolvable after round 3| L[ESCALATED to Executive]
     J -->|unanimous hard reject| M[REJECTED]
     
-    K & L & M -->|immutable audit trail| N[Band Room Log]
+    K & L & M -->|audit trail| N[Band Room Log]
 ```
 
 ---
