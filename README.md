@@ -7,7 +7,6 @@
     <img src="https://img.shields.io/badge/Track-Internal_Enterprise-e07a5f?style=flat-square" alt="Track 1" />
     <img src="https://img.shields.io/badge/Partner-Band_SDK-blue?style=flat-square" alt="Band SDK" />
     <img src="https://img.shields.io/badge/Partner-AI%2FML_API-green?style=flat-square" alt="AI/ML API" />
-    <img src="https://img.shields.io/badge/Partner-Featherless-purple?style=flat-square" alt="Featherless" />
   </p>
 </div>
 
@@ -21,14 +20,14 @@ Cordane is a deterministic, multi-agent consensus engine. You drop a vendor cont
 
 ## 🎯 Partner Hackathon Bounties Targeted
 
-To prove that Cordane is an enterprise-grade, model-agnostic architecture, we strategically integrated best-in-class models using the hackathon's exact partner bounties:
+To prove that Cordane is an enterprise-grade, model-agnostic architecture, we strategically integrated best-in-class models using **AI/ML API** to build our powerful Mixture of Experts (MoE) mesh:
 
 | Department | Model | Partner Provider | Rationale |
 | :--- | :--- | :--- | :--- |
-| ⚖️ **Legal** | `Claude Sonnet 4.6` | **AI/ML API** | Superior at parsing dense indemnification clauses and legal nuance. |
-| 💰 **Finance** | `QwQ-32B` | **AI/ML API** | Exceptionally fast numerical reasoning for margin analysis. |
-| 🛡️ **Risk** | `DeepSeek-R1` | **AI/ML API** | Robust reasoning for global compliance and vulnerability auditing. |
-| ⚙️ **Ops** | `Qwen3-235B` | **Featherless** | Massive parameter density to analyze SLA integration timelines. |
+| ⚖️ **Legal** | `claude-3-5-sonnet-20240620` | **AI/ML API** | Superior at parsing dense indemnification clauses and legal nuance. |
+| 💰 **Finance** | `gpt-4o` | **AI/ML API** | Exceptionally fast numerical reasoning for margin analysis. |
+| 🛡️ **Risk** | `deepseek-reasoner` | **AI/ML API** | Robust reasoning for global compliance and vulnerability auditing. |
+| ⚙️ **Ops** | `meta-llama/Llama-3-70b-chat-hf` | **AI/ML API** | Excellent at standardizing and structuring operational SLA requirements. |
 
 ## 🧠 System Architecture
 
@@ -39,10 +38,10 @@ graph TD
     A[Human Executive] -->|Uploads Contract| B(Cordane Next.js Dashboard)
     B -->|REST API| C{FastAPI Orchestrator}
     
-    C -->|Spawns Agent| D[Legal: Claude 3.5]
-    C -->|Spawns Agent| E[Finance: QwQ-32B]
-    C -->|Spawns Agent| F[Risk: DeepSeek-R1]
-    C -->|Spawns Agent| G[Ops: Qwen3-235B]
+    C -->|Spawns Agent| D[Legal: Claude 3.5 Sonnet]
+    C -->|Spawns Agent| E[Finance: GPT-4o]
+    C -->|Spawns Agent| F[Risk: DeepSeek-Reasoner]
+    C -->|Spawns Agent| G[Ops: Llama 3 70B]
     
     D -.->|Real-Time Telemetry| H[Band Room SDK]
     E -.->|Real-Time Telemetry| H
@@ -78,7 +77,7 @@ Cordane is architected as a clean monorepo. The frontend and backend live togeth
 3. Select this repository.
 4. **Build Command:** `cd api && pip install -r requirements.txt`
 5. **Start Command:** `cd api && uvicorn server:app --host 0.0.0.0 --port $PORT`
-6. Add your Environment Variables: `AIML_API_KEY`, `FEATHERLESS_API_KEY`, `BAND_ROOM_ID`.
+6. Add your Environment Variables: `AIML_API_KEY`, `BAND_API_KEY`.
 
 ### Deploy the Frontend (Vercel)
 1. Log in to [Vercel](https://vercel.com/) and import this repository.

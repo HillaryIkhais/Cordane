@@ -57,9 +57,14 @@ export default function UploadPage() {
         <h3 className="font-serif text-3xl mb-3">Drag & Drop Document</h3>
         <p className="text-sm opacity-50 font-mono uppercase tracking-widest max-w-sm">Supports PDF, DOCX, TXT. <br/>Maximum file size: 50MB.</p>
 
-        <button className="mt-8 relative z-20 px-8 py-3 bg-foreground/5 border border-foreground/10 text-foreground text-xs font-bold uppercase tracking-widest rounded-md hover:bg-[#cc8b45]/20 hover:border-[#cc8b45]/50 hover:text-[#cc8b45] transition-all">
-          Browse Files
-        </button>
+        <div className="mt-8 flex flex-col sm:flex-row gap-4 relative z-20">
+          <button onClick={handleFileAction} className="px-8 py-3 bg-foreground/5 border border-foreground/10 text-foreground text-xs font-bold uppercase tracking-widest rounded-md hover:bg-[#cc8b45]/20 hover:border-[#cc8b45]/50 hover:text-[#cc8b45] transition-all shadow-xl">
+            Browse Files
+          </button>
+          <button onClick={(e) => { e.stopPropagation(); router.push('/platform'); }} className="px-8 py-3 bg-transparent border border-transparent text-[#cc8b45] text-xs font-bold uppercase tracking-widest rounded-md hover:bg-[#cc8b45]/10 hover:border-[#cc8b45]/30 transition-all">
+            Run Demo Scenario
+          </button>
+        </div>
       </div>
 
       {/* Advanced Configuration */}
