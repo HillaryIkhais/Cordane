@@ -4,20 +4,44 @@
     "title": "Basic Software License (Happy Path)",
     "status": "Ready",
     "date": "Jun 08, 2026",
-    "contract": { "terms": "Standard SaaS" }
+    "contract": {
+      "terms": "Standard SaaS"
+    }
   },
   {
     "id": "scenario_2_compromise",
     "title": "Cloud Hosting Agreement (Compromise)",
     "status": "Ready",
     "date": "Jun 09, 2026",
-    "contract": { "terms": "Standard Cloud" }
+    "contract": {
+      "terms": "Standard Cloud"
+    }
   },
   {
     "id": "scenario_3_deadlock",
     "title": "Vendor Liability Contract (Deadlock)",
     "status": "Ready",
     "date": "Jun 10, 2026",
-    "contract": { "terms": "Uncapped Liability" }
+    "contract": {
+      "terms": "Uncapped Liability"
+    }
+  },
+  {
+    "id": "scenario_c82398c2",
+    "title": "Cordane Contract Review",
+    "status": "Ready",
+    "date": "Jun 18, 2026",
+    "contract": {
+      "raw_text": "Standard liability terms apply. Unlimited indemnification clause 4.2."
+    }
+  },
+  {
+    "id": "scenario_e5f1f291",
+    "title": "Cordane Contract Review",
+    "status": "Ready",
+    "date": "Jun 18, 2026",
+    "contract": {
+      "raw_text": "Standard liability terms apply. Unlimited indemnification clause 4.2."
+    }
   }
 ]

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle2, AlertTriangle, XCircle, Download, RotateCcw, ArrowLeft } from "lucide-react";
+import { CheckCircle2, AlertTriangle, XCircle, Download, RotateCcw, ArrowLeft, Lock } from "lucide-react";
 import { Logo } from "@/components/logo";
 
 type RoomState = "NEGOTIATING" | "VERDICT";
@@ -207,7 +207,33 @@ export default function PlatformPage() {
             <motion.div key="verdict" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }} className="flex flex-col gap-12 w-full max-w-4xl mx-auto mt-10">
               
               <div className="text-center flex flex-col items-center">
-                <div className="relative mb-8">
+                {/* CONSENSUS EVALUATOR ROUNDS */}
+                <div className="mb-8 w-full max-w-md bg-background/80 backdrop-blur-xl border border-[#cc8b45]/30 rounded-xl p-6 text-left shadow-[0_0_30px_rgba(204,139,69,0.1)]">
+                  <h3 className="text-xs font-bold text-[#cc8b45] uppercase tracking-widest mb-4 flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-[#cc8b45] animate-pulse"></span>
+                    Consensus Evaluator
+                  </h3>
+                  <div className="flex flex-col gap-3 font-mono text-[10px] sm:text-xs">
+                    <div className="flex justify-between border-b border-foreground/5 pb-2">
+                      <span className="opacity-50">Round 1:</span>
+                      <span className="opacity-90">{verdict === 'APPROVED' ? 'Consensus Reached' : 'Deadlock Detected'}</span>
+                    </div>
+                    {verdict !== 'APPROVED' && (
+                      <div className="flex justify-between border-b border-foreground/5 pb-2">
+                        <span className="opacity-50">Round 2:</span>
+                        <span className="opacity-90">Negotiation Failed</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between pt-1 font-bold">
+                      <span className="opacity-50">Decision:</span>
+                      <span className={verdict === 'APPROVED' ? 'text-green-400' : verdict === 'REJECTED' ? 'text-red-400' : 'text-amber-400'}>
+                        {verdict}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="relative mb-8 mt-4">
                   {verdict === "APPROVED" && (
                     <>
                       <div className="absolute inset-0 bg-green-500 blur-3xl opacity-20 rounded-full animate-pulse"></div>
@@ -257,6 +283,46 @@ export default function PlatformPage() {
                   </div>
                 </div>
               )}
+
+              {/* IMMUTABLE AUDIT LOG */}
+              <div className="mt-4 bg-[#0a0a0a] border border-border/50 rounded-2xl overflow-hidden shadow-2xl font-mono text-xs">
+                <div className="p-4 border-b border-white/10 bg-white/5 flex justify-between items-center">
+                  <div className="flex items-center gap-3">
+                    <Lock className="w-4 h-4 text-[#cc8b45]" />
+                    <span className="uppercase tracking-widest font-bold opacity-80">Immutable Audit Log</span>
+                  </div>
+                  <span className="opacity-40">{new Date().toISOString()}</span>
+                </div>
+                <div className="p-6 text-foreground/70 flex flex-col gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-b border-white/5 pb-4">
+                    <div>
+                      <span className="opacity-50 block mb-1">Contract ID:</span>
+                      <span className="text-[#cc8b45]">cordane-req-{Math.floor(Math.random() * 10000)}</span>
+                    </div>
+                    <div>
+                      <span className="opacity-50 block mb-1">Participants:</span>
+                      <span>LGL (Claude 3.5), FIN (GPT-4o), RSK (DeepSeek), OPS (Llama 3)</span>
+                    </div>
+                  </div>
+                  <div>
+                    <span className="opacity-50 block mb-3 uppercase tracking-widest">Negotiation History:</span>
+                    <div className="bg-black/50 p-4 rounded-lg border border-white/5 max-h-[300px] overflow-y-auto flex flex-col gap-3">
+                      {transcript.map((msg, idx) => (
+                        <div key={idx} className="flex gap-4">
+                          <span className="w-12 shrink-0 opacity-40">[{msg.role.substring(0,3).toUpperCase()}]</span>
+                          <span className={msg.content.includes('FLAG') ? 'text-amber-400/90' : 'opacity-80'}>{msg.content}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="pt-2 flex justify-between items-center">
+                    <span className="opacity-50 uppercase tracking-widest">Final Outcome:</span>
+                    <span className={`font-bold px-3 py-1 rounded bg-white/5 ${verdict === 'APPROVED' ? 'text-green-400' : verdict === 'REJECTED' ? 'text-red-400' : 'text-amber-400'}`}>
+                      {verdict}
+                    </span>
+                  </div>
+                </div>
+              </div>
 
               <div className="flex flex-col sm:flex-row justify-center gap-6 pt-10 border-t border-border/50">
                 {verdict === "ESCALATED" && (

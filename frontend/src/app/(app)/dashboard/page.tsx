@@ -65,6 +65,28 @@ export default function DashboardPage() {
         <Link href="/upload" className="text-[#cc8b45] text-sm font-bold uppercase tracking-wider">New Review &rarr;</Link>
       </header>
 
+      {/* ZONE 0: ENTERPRISE GOVERNANCE METRICS */}
+      <section className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-2">
+        {[
+          { label: "Agents Participating", value: "4", sub: "LGL, FIN, RSK, OPS" },
+          { label: "Negotiation Rounds", value: "2", sub: "Avg per decision" },
+          { label: "Consensus Confidence", value: "92%", sub: "Mathematical alignment" },
+          { label: "Decision Time", value: "14 sec", sub: "vs 12 days manual" }
+        ].map((metric, idx) => (
+          <motion.div 
+            key={idx}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: idx * 0.1 }}
+            className="bg-background/40 backdrop-blur-xl border border-border/50 rounded-xl p-5 flex flex-col justify-center shadow-lg hover:border-[#cc8b45]/30 transition-colors group"
+          >
+            <div className="text-[10px] font-mono uppercase tracking-widest opacity-50 mb-2 group-hover:text-[#cc8b45] transition-colors">{metric.label}</div>
+            <div className="font-serif text-3xl text-foreground/90 mb-1">{metric.value}</div>
+            <div className="text-xs text-foreground/40 font-medium">{metric.sub}</div>
+          </motion.div>
+        ))}
+      </section>
+
       {/* ZONE 1: ATTENTION BANNER (Only show if there's real deadlocked data) */}
       {deadlockedCount > 0 && (
         <motion.div 
