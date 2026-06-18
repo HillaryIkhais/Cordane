@@ -17,7 +17,7 @@
   </p>
 
   <p>
-    <a href="https://cordane-theta.vercel.app"><b>🔗 Live Demo</b></a>
+    <a href="https://cordane-theta.vercel.app"><b>Live Demo</b></a>
   </p>
 </div>
 
@@ -43,6 +43,9 @@ They don't run in parallel and dump four separate reports. They react to each ot
 - **Approved** — agents reached consensus, full audit trail attached
 - **Rejected** — specific clause or constraint blocked consensus, exact reason surfaced  
 - **Escalated** — agents couldn't agree after 3 negotiation rounds; human gets a precise summary of exactly what's blocking and what each agent needs
+- **Approved** — agents reached consensus, full audit trail attached
+- **Rejected** — specific clause or constraint blocked consensus, exact reason surfaced
+- **Escalated** — agents couldn't agree after 3 negotiation rounds; human gets a precise summary of exactly what's blocking and what each agent needs
 
 The executive doesn't wade through four reports. One verdict. One audit trail. One action.
 
@@ -52,6 +55,10 @@ The executive doesn't wade through four reports. One verdict. One audit trail. O
 
 | Agent | Model | Provider | Role |
 |:---|:---|:---|:---|
+| **Legal** | `claude-3-5-sonnet-20240620` | AI/ML API | Parses contract language, flags liability terms, data ownership clauses, indemnification risks |
+| **Finance** | `gpt-4o` | AI/ML API | Checks payment terms, cost thresholds, margin calculations, flags budget conflicts |
+| **Risk** | `deepseek-reasoner` | AI/ML API | Scores vendor reliability, flags concentration risk, OFAC/GDPR compliance gaps |
+| **Ops** | `meta-llama/Llama-3-70b-instruct` | AI/ML API | Assesses integration feasibility, timeline realism, team capacity blockers |
 | **Legal** | `claude-3-5-sonnet-20240620` | AI/ML API | Parses contract language, flags liability terms, data ownership clauses, indemnification risks |
 | **Finance** | `gpt-4o` | AI/ML API | Checks payment terms, cost thresholds, margin calculations, flags budget conflicts |
 | **Risk** | `deepseek-reasoner` | AI/ML API | Scores vendor reliability, flags concentration risk, OFAC/GDPR compliance gaps |
@@ -99,6 +106,9 @@ graph TD
     J -->|all agents pass| K[APPROVED]
     J -->|unresolvable after round 3| L[ESCALATED to Executive]
     J -->|unanimous hard reject| M[REJECTED]
+    J -->|all agents pass| K[APPROVED]
+    J -->|unresolvable after round 3| L[ESCALATED to Executive]
+    J -->|unanimous hard reject| M[REJECTED]
     
     K & L & M -->|immutable audit trail| N[Band Room Log]
 ```
@@ -106,12 +116,14 @@ graph TD
 ---
 
 ## Consensus Mechanism
+## Consensus Mechanism
 
 Cordane's decision logic is deterministic, not probabilistic:
 
 1. **Any agent can veto** if a hard constraint is violated (uncapped liability, budget 3x+ over threshold, OFAC hit)
 2. **Agents negotiate for up to 3 rounds** — each round, agents read the full Band room history and post updated positions
 3. **If any hard veto remains after round 3** → escalate to human with a precise breakdown of what's blocking and what each agent needs to resolve it
+3. **If any hard veto remains after round 3** — escalate to human with a precise breakdown of what's blocking and what each agent needs to resolve it
 4. **The human gets three options**: Approve Anyway / Reject / Send Back for Revision
 
 This guarantees Cordane never silently approves a dangerous contract and never hallucinates a compromise.
@@ -119,6 +131,7 @@ This guarantees Cordane never silently approves a dangerous contract and never h
 ---
 
 ## The Demo Scenarios
+## Demo Scenarios
 
 Each scenario is engineered to produce a genuinely different outcome — proving Cordane is a reasoning system, not a scripted demo:
 
@@ -155,13 +168,13 @@ cordane/
 │   └── orchestration/
 │       ├── mesh_state.py                # EnterpriseContextRegistry (Pydantic V2)
 │       ├── cordane_optimized_mesh.py    # Veto + bounded rounds orchestrator
-│       └── cordane_global_sentinel.py  # Pre-flight contract validation
+│       └── cordane_global_sentinel.py   # Pre-flight contract validation
 ├── frontend/
 │   ├── src/app/
 │   │   ├── page.tsx                     # Landing page
-│   │   ├── platform/page.tsx           # Upload + negotiation room
-│   │   └── dashboard/page.tsx          # User dashboard
-│   └── process_logo.py                 # Logo processing utility
+│   │   ├── platform/page.tsx            # Upload + negotiation room
+│   │   └── dashboard/page.tsx           # User dashboard
+│   └── process_logo.py                  # Logo processing utility
 ├── render.yaml
 ├── .env.example
 └── README.md
@@ -235,6 +248,8 @@ Cordane is built for regulated enterprise environments:
 ## Built By
 
 Team **Stratum** · Band of Agents Hackathon 2026  
+**Hillary Ikhais** — ML Engineer, CS student at FUPRE, Nigeria
+Team **Stratum** · Band of Agents Hackathon 2026
 [github.com/HillaryIkhais](https://github.com/HillaryIkhais)
 
 ---
