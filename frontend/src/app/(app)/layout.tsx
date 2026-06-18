@@ -2,11 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Scale, Shield, Settings, FileText, Upload, LogOut } from "lucide-react";
+import { Home, Shield, Settings, Upload, LogOut, ArrowLeft, HelpCircle } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { AuthGuard } from "@/components/auth/AuthGuard";
 import { useAuth } from "@/components/auth/AuthContext";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { useState } from "react";
+import { HowItWorksModal } from "@/components/how-it-works-modal";
 
 const navItems = [
   { href: "/dashboard", icon: Home, label: "Overview" },
@@ -17,6 +19,7 @@ const navItems = [
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { logout, user } = useAuth();
+  const [showHelpModal, setShowHelpModal] = useState(false);
 
   return (
     <AuthGuard>
@@ -47,6 +50,25 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 </Link>
               );
             })}
+            
+            <div className="h-px w-full bg-border/50 my-4"></div>
+
+            <button 
+              onClick={() => setShowHelpModal(true)}
+              className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all text-foreground/50 hover:text-foreground/80 hover:bg-foreground/5 text-left"
+            >
+              <HelpCircle className="w-4 h-4" />
+              How it Works
+            </button>
+
+            <Link 
+              href="/"
+              className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all text-foreground/50 hover:text-foreground/80 hover:bg-foreground/5"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back to Website
+            </Link>
+
           </nav>
 
           {/* Workspace info and CTA */}
@@ -82,6 +104,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           {children}
         </main>
         
+        <HowItWorksModal isOpen={showHelpModal} onClose={() => setShowHelpModal(false)} />
+
       </div>
     </AuthGuard>
   );

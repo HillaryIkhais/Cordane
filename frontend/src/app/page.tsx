@@ -2,34 +2,124 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useTheme } from "next-themes";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { TypewriterFeed } from "@/components/typewriter-feed";
+import { HowItWorksModal } from "@/components/how-it-works-modal";
+import { HelpCircle, LogIn, UserCircle2, LayoutDashboard, Settings, LogOut, ChevronDown } from "lucide-react";
+import { useAuth } from "@/components/auth/AuthContext";
+import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
+import { Logo } from "@/components/logo";
 
 export default function LandingPage() {
   const { theme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [activeFeedIndex, setActiveFeedIndex] = useState(0);
+  const [showHelpModal, setShowHelpModal] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  
+  const { login, logout, authenticated, user } = useAuth();
+  const router = useRouter();
+  const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setMounted(true);
+    
+    // Close menu when clicking outside
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setShowUserMenu(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const currentTheme = mounted ? (theme === 'system' ? resolvedTheme : theme) : 'dark';
 
-  // Helper to determine if a specific card should be highlighted
-  // 0 = LGL (Legal), 1 = FIN (Finance), 2 = RSK (Risk), 3 = OPS (not in feed, so idle)
   const isCardActive = (idx: number) => activeFeedIndex === idx;
+
+  const handleStartReview = () => {
+    if (authenticated) {
+      router.push("/dashboard");
+    } else {
+      login();
+    }
+  };
 
   return (
     <main className="min-h-screen w-full bg-background text-foreground font-sans relative overflow-hidden flex flex-col justify-center transition-colors duration-1000 ease-in-out">
       
       {/* Top Navigation / Controls */}
       <header className="absolute top-0 w-full p-6 md:p-8 z-50 flex justify-between items-center">
-        <Link href="/" className="flex items-center gap-3 group opacity-0 md:opacity-100 pointer-events-none md:pointer-events-auto">
-        </Link>
+        <div className="flex items-center gap-3">
+          <Logo className="w-8 h-8" />
+          <span className="font-serif text-2xl tracking-tight">Cordane.</span>
+        </div>
         <div className="flex items-center gap-4 ml-auto">
+          <button 
+            onClick={() => setShowHelpModal(true)}
+            className="hidden md:flex items-center gap-2 px-4 py-2 rounded-full border border-border bg-foreground/5 hover:bg-foreground/10 backdrop-blur-md text-sm font-medium transition-colors"
+          >
+            <HelpCircle className="w-4 h-4" /> How it Works
+          </button>
+          
+          {mounted && (
+            authenticated ? (
+              <div className="relative" ref={menuRef}>
+                <button 
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#cc8b45]/10 border border-[#cc8b45]/30 text-[#cc8b45] text-sm font-medium hover:bg-[#cc8b45]/20 transition-colors"
+                >
+                  <UserCircle2 className="w-4 h-4" /> 
+                  <span className="max-w-[120px] truncate">{user?.email?.address || user?.google?.email || "Account"}</span>
+                  <ChevronDown className={`w-3 h-3 transition-transform ${showUserMenu ? 'rotate-180' : ''}`} />
+                </button>
+                
+                <AnimatePresence>
+                  {showUserMenu && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute right-0 mt-2 w-56 bg-background/80 backdrop-blur-xl border border-border/50 rounded-xl shadow-2xl overflow-hidden py-2"
+                    >
+                      <Link href="/dashboard" onClick={() => setShowUserMenu(false)}>
+                        <div className="flex items-center gap-3 px-4 py-2.5 hover:bg-foreground/5 text-sm transition-colors cursor-pointer text-foreground/80 hover:text-foreground">
+                          <LayoutDashboard className="w-4 h-4" /> Go to Dashboard
+                        </div>
+                      </Link>
+                      <Link href="/settings" onClick={() => setShowUserMenu(false)}>
+                        <div className="flex items-center gap-3 px-4 py-2.5 hover:bg-foreground/5 text-sm transition-colors cursor-pointer text-foreground/80 hover:text-foreground">
+                          <Settings className="w-4 h-4" /> Settings Profile
+                        </div>
+                      </Link>
+                      <div className="h-px w-full bg-border/50 my-1"></div>
+                      <button 
+                        onClick={() => {
+                          setShowUserMenu(false);
+                          logout();
+                        }}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-red-500/10 hover:text-red-400 text-sm transition-colors cursor-pointer text-foreground/80"
+                      >
+                        <LogOut className="w-4 h-4" /> Log Out
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            ) : (
+              <button 
+                onClick={login}
+                className="flex items-center gap-2 px-4 py-2 rounded-full bg-foreground text-background text-sm font-medium hover:bg-foreground/90 transition-colors"
+              >
+                <LogIn className="w-4 h-4" /> Log In
+              </button>
+            )
+          )}
           <ThemeToggle />
         </div>
       </header>
@@ -39,7 +129,7 @@ export default function LandingPage() {
         
         {/* LEFT COLUMN: Copy & CTA */}
         <div className="flex flex-col items-start space-y-8 max-w-xl relative z-20">
-          <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full border border-border bg-foreground/5 backdrop-blur-md mb-6 shadow-sm transition-colors duration-700 ease-in-out">
+          <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full border border-border bg-foreground/5 backdrop-blur-md mb-6 shadow-sm transition-colors duration-700 ease-in-out mt-12 md:mt-0">
             <span className="w-2 h-2 rounded-full bg-[#cc8b45] animate-pulse" />
             <span className="text-xs font-mono text-foreground/80 uppercase tracking-widest transition-colors duration-700">Cordane Engine v2.0 Live</span>
           </div>
@@ -55,17 +145,25 @@ export default function LandingPage() {
             Cordane puts legal, finance, risk, and ops in the same room — before you sign anything. No more Slack threads. No more decision deadlock.
           </p>
 
-          <div className="pt-6">
-            <Link href="/dashboard">
-              <button className="px-8 py-4 bg-[#cc8b45] hover:bg-[#b57a3c] text-black font-sans font-bold text-xs tracking-wider uppercase transition-all rounded-md shadow-lg flex items-center gap-2">
-                Start a Review <span className="text-lg leading-none">&rarr;</span>
-              </button>
-            </Link>
+          <div className="pt-6 flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
+            <button 
+              onClick={handleStartReview}
+              className="w-full sm:w-auto px-8 py-4 bg-[#cc8b45] hover:bg-[#b57a3c] text-black font-sans font-bold text-xs tracking-wider uppercase transition-all rounded-md shadow-lg flex items-center justify-center gap-2"
+            >
+              {mounted && authenticated ? 'Go to Dashboard' : 'Log In / Sign Up'} <span className="text-lg leading-none">&rarr;</span>
+            </button>
+            
+            <button 
+              onClick={() => setShowHelpModal(true)}
+              className="w-full sm:w-auto px-8 py-4 bg-foreground/5 border border-border hover:bg-foreground/10 text-foreground font-sans font-bold text-xs tracking-wider uppercase transition-all rounded-md shadow-sm"
+            >
+              How it Works
+            </button>
           </div>
         </div>
 
         {/* RIGHT COLUMN: Interactive Orb & Agents */}
-        <div className="relative w-full aspect-square max-w-[600px] mx-auto lg:ml-auto flex items-center justify-center">
+        <div className="relative w-full aspect-square max-w-[600px] mx-auto lg:ml-auto flex items-center justify-center mt-12 lg:mt-0">
           
           {/* Glowing Orb Background */}
           <div className="absolute inset-0 flex items-center justify-center z-0">
@@ -134,6 +232,8 @@ export default function LandingPage() {
           </div>
         </div>
       </div>
+
+      <HowItWorksModal isOpen={showHelpModal} onClose={() => setShowHelpModal(false)} />
     </main>
   );
 }

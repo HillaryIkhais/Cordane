@@ -7,6 +7,12 @@ import { Upload, FileText, Settings2, ShieldAlert, Zap, Lock } from "lucide-reac
 
 export default function UploadPage() {
   const [isDragging, setIsDragging] = useState(false);
+  
+  // Mesh Config Toggle States
+  const [strictLiability, setStrictLiability] = useState(true);
+  const [gdprCompliance, setGdprCompliance] = useState(false);
+  const [fastExecution, setFastExecution] = useState(false);
+
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -76,13 +82,16 @@ export default function UploadPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Config Toggle 1 */}
-          <div className="bg-background/60 backdrop-blur-xl border border-border/50 rounded-xl p-6 flex flex-col gap-4 shadow-xl hover:border-[#cc8b45]/30 transition-colors group cursor-pointer">
+          <div 
+            onClick={() => setStrictLiability(!strictLiability)}
+            className={`bg-background/60 backdrop-blur-xl border rounded-xl p-6 flex flex-col gap-4 shadow-xl transition-all group cursor-pointer ${strictLiability ? 'border-[#cc8b45]/30' : 'border-border/50 hover:border-foreground/20 opacity-70 hover:opacity-100'}`}
+          >
             <div className="flex justify-between items-start">
-              <div className="p-2.5 bg-[#cc8b45]/10 rounded-lg border border-[#cc8b45]/20 group-hover:bg-[#cc8b45]/20 transition-colors">
-                <ShieldAlert className="w-5 h-5 text-[#cc8b45]" />
+              <div className={`p-2.5 rounded-lg border transition-colors ${strictLiability ? 'bg-[#cc8b45]/10 border-[#cc8b45]/20 text-[#cc8b45]' : 'bg-foreground/5 border-foreground/10 text-foreground/60 group-hover:text-foreground'}`}>
+                <ShieldAlert className="w-5 h-5" />
               </div>
-              <div className="w-10 h-5 bg-[#cc8b45] rounded-full relative shadow-[0_0_15px_rgba(204,139,69,0.4)]">
-                <div className="w-4 h-4 bg-black rounded-full absolute right-0.5 top-0.5"></div>
+              <div className={`w-10 h-5 rounded-full relative transition-colors ${strictLiability ? 'bg-[#cc8b45] shadow-[0_0_15px_rgba(204,139,69,0.4)]' : 'bg-foreground/10 border border-foreground/10'}`}>
+                <div className={`w-4 h-4 rounded-full absolute top-0.5 transition-all ${strictLiability ? 'bg-black right-0.5' : 'bg-foreground/40 left-0.5'}`}></div>
               </div>
             </div>
             <div>
@@ -92,13 +101,16 @@ export default function UploadPage() {
           </div>
 
           {/* Config Toggle 2 */}
-          <div className="bg-background/60 backdrop-blur-xl border border-border/50 rounded-xl p-6 flex flex-col gap-4 shadow-xl hover:border-foreground/20 transition-colors group cursor-pointer opacity-70 hover:opacity-100">
+          <div 
+            onClick={() => setGdprCompliance(!gdprCompliance)}
+            className={`bg-background/60 backdrop-blur-xl border rounded-xl p-6 flex flex-col gap-4 shadow-xl transition-all group cursor-pointer ${gdprCompliance ? 'border-[#cc8b45]/30' : 'border-border/50 hover:border-foreground/20 opacity-70 hover:opacity-100'}`}
+          >
             <div className="flex justify-between items-start">
-              <div className="p-2.5 bg-foreground/5 rounded-lg border border-foreground/10 group-hover:bg-foreground/10 transition-colors">
-                <Lock className="w-5 h-5 text-foreground/60 group-hover:text-foreground" />
+              <div className={`p-2.5 rounded-lg border transition-colors ${gdprCompliance ? 'bg-[#cc8b45]/10 border-[#cc8b45]/20 text-[#cc8b45]' : 'bg-foreground/5 border-foreground/10 text-foreground/60 group-hover:text-foreground'}`}>
+                <Lock className="w-5 h-5" />
               </div>
-              <div className="w-10 h-5 bg-foreground/10 rounded-full relative border border-foreground/10">
-                <div className="w-4 h-4 bg-foreground/40 rounded-full absolute left-0.5 top-0.5"></div>
+              <div className={`w-10 h-5 rounded-full relative transition-colors ${gdprCompliance ? 'bg-[#cc8b45] shadow-[0_0_15px_rgba(204,139,69,0.4)]' : 'bg-foreground/10 border border-foreground/10'}`}>
+                <div className={`w-4 h-4 rounded-full absolute top-0.5 transition-all ${gdprCompliance ? 'bg-black right-0.5' : 'bg-foreground/40 left-0.5'}`}></div>
               </div>
             </div>
             <div>
@@ -108,13 +120,16 @@ export default function UploadPage() {
           </div>
 
           {/* Config Toggle 3 */}
-          <div className="bg-background/60 backdrop-blur-xl border border-border/50 rounded-xl p-6 flex flex-col gap-4 shadow-xl hover:border-foreground/20 transition-colors group cursor-pointer opacity-70 hover:opacity-100">
+          <div 
+            onClick={() => setFastExecution(!fastExecution)}
+            className={`bg-background/60 backdrop-blur-xl border rounded-xl p-6 flex flex-col gap-4 shadow-xl transition-all group cursor-pointer ${fastExecution ? 'border-[#cc8b45]/30' : 'border-border/50 hover:border-foreground/20 opacity-70 hover:opacity-100'}`}
+          >
             <div className="flex justify-between items-start">
-              <div className="p-2.5 bg-foreground/5 rounded-lg border border-foreground/10 group-hover:bg-foreground/10 transition-colors">
-                <Zap className="w-5 h-5 text-foreground/60 group-hover:text-foreground" />
+              <div className={`p-2.5 rounded-lg border transition-colors ${fastExecution ? 'bg-[#cc8b45]/10 border-[#cc8b45]/20 text-[#cc8b45]' : 'bg-foreground/5 border-foreground/10 text-foreground/60 group-hover:text-foreground'}`}>
+                <Zap className="w-5 h-5" />
               </div>
-              <div className="w-10 h-5 bg-foreground/10 rounded-full relative border border-foreground/10">
-                <div className="w-4 h-4 bg-foreground/40 rounded-full absolute left-0.5 top-0.5"></div>
+              <div className={`w-10 h-5 rounded-full relative transition-colors ${fastExecution ? 'bg-[#cc8b45] shadow-[0_0_15px_rgba(204,139,69,0.4)]' : 'bg-foreground/10 border border-foreground/10'}`}>
+                <div className={`w-4 h-4 rounded-full absolute top-0.5 transition-all ${fastExecution ? 'bg-black right-0.5' : 'bg-foreground/40 left-0.5'}`}></div>
               </div>
             </div>
             <div>
