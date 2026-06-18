@@ -61,7 +61,7 @@ Each model was selected for the specific cognitive task of that agent — not by
 
 ---
 
-## Why Band Is the Backbone — Not a Wrapper
+## Why Band Is the Backbone
 
 This is the architectural decision that makes Cordane an intriguing multi-agent system.
 
