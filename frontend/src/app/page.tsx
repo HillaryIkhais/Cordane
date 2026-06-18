@@ -177,13 +177,13 @@ export default function LandingPage() {
                   }}
                 >
                   <Image 
-                    src={currentTheme === "light" ? "/light_orb_scaled.png" : "/dark_orb_premium.png"} 
+                    src="/light_orb_scaled.png"
                     alt="Cordane Orb" 
                     fill 
                     className={`object-contain transition-all duration-1000 ease-in-out ${
                       currentTheme === "light"
                         ? "mix-blend-multiply opacity-90 scale-100"
-                        : "mix-blend-screen opacity-100 scale-100"
+                        : "mix-blend-screen opacity-100 scale-100 filter invert"
                     }`}
                     priority
                   />
