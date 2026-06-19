@@ -24,8 +24,38 @@ export default function UploadPage() {
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement> | React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
+
+    let file: File | undefined;
+    let uploadMethod = 'browse';
+
+    if ('dataTransfer' in e) {
+      file = e.dataTransfer.files?.[0];
+      uploadMethod = 'drag_and_drop';
+    } else {
+      file = e.target.files?.[0];
+    }
+
+    pendo.track("contract_file_uploaded", {
+      fileType: file?.type || "unknown",
+      fileName: file?.name || "unknown",
+      fileSize: file?.size || 0,
+      uploadMethod: uploadMethod,
+    });
+
     // In a real app we'd process the file here. For now, navigate.
     router.push('/platform');
+  };
+
+  const handleToggleConfig = (configName: string, setter: (v: boolean) => void, currentValue: boolean) => {
+    const newValue = !currentValue;
+    setter(newValue);
+    pendo.track("upload_mesh_config_toggled", {
+      configName: configName,
+      enabled: newValue,
+      strictLiability: configName === "Strict Liability Focus" ? newValue : strictLiability,
+      gdprCompliance: configName === "GDPR Compliance" ? newValue : gdprCompliance,
+      fastExecution: configName === "Fast Execution Mode" ? newValue : fastExecution,
+    });
   };
   
   return (
@@ -83,7 +113,7 @@ export default function UploadPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Config Toggle 1 */}
           <div 
-            onClick={() => setStrictLiability(!strictLiability)}
+            onClick={() => handleToggleConfig("Strict Liability Focus", setStrictLiability, strictLiability)}
             className={`bg-background/60 backdrop-blur-xl border rounded-xl p-6 flex flex-col gap-4 shadow-xl transition-all group cursor-pointer ${strictLiability ? 'border-[#cc8b45]/30' : 'border-border/50 hover:border-foreground/20 opacity-70 hover:opacity-100'}`}
           >
             <div className="flex justify-between items-start">
@@ -102,7 +132,7 @@ export default function UploadPage() {
 
           {/* Config Toggle 2 */}
           <div 
-            onClick={() => setGdprCompliance(!gdprCompliance)}
+            onClick={() => handleToggleConfig("GDPR Compliance", setGdprCompliance, gdprCompliance)}
             className={`bg-background/60 backdrop-blur-xl border rounded-xl p-6 flex flex-col gap-4 shadow-xl transition-all group cursor-pointer ${gdprCompliance ? 'border-[#cc8b45]/30' : 'border-border/50 hover:border-foreground/20 opacity-70 hover:opacity-100'}`}
           >
             <div className="flex justify-between items-start">
@@ -121,7 +151,7 @@ export default function UploadPage() {
 
           {/* Config Toggle 3 */}
           <div 
-            onClick={() => setFastExecution(!fastExecution)}
+            onClick={() => handleToggleConfig("Fast Execution Mode", setFastExecution, fastExecution)}
             className={`bg-background/60 backdrop-blur-xl border rounded-xl p-6 flex flex-col gap-4 shadow-xl transition-all group cursor-pointer ${fastExecution ? 'border-[#cc8b45]/30' : 'border-border/50 hover:border-foreground/20 opacity-70 hover:opacity-100'}`}
           >
             <div className="flex justify-between items-start">

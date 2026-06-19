@@ -3,6 +3,10 @@
 import { useEffect, useRef } from "react";
 import { useAuth } from "@/components/auth/AuthContext";
 
+// Module-level flag to deduplicate auth tracking across remounts.
+// Resets when user becomes unauthenticated (logout).
+let lastAuthState = false;
+
 export function PendoInitializer() {
   const { ready, authenticated, user } = useAuth();
   const initializedRef = useRef(false);
@@ -28,6 +32,16 @@ export function PendoInitializer() {
           loginMethod: loginMethod,
         }
       });
+
+      if (!lastAuthState) {
+        lastAuthState = true;
+        pendo.track("user_authenticated", {
+          loginMethod: loginMethod,
+          email: email,
+        });
+      }
+    } else if (ready && !authenticated) {
+      lastAuthState = false;
     }
   }, [ready, authenticated, user]);
 

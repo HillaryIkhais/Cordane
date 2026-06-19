@@ -20,6 +20,7 @@ export default function PlatformPage() {
   const [roomState, setRoomState] = useState<RoomState>("NEGOTIATING");
   
   // Real Backend State
+  const [currentScenarioId, setCurrentScenarioId] = useState("");
   const [isFetching, setIsFetching] = useState(false);
   const [transcript, setTranscript] = useState<{role: string, content: string, score?: number}[]>([]);
   const [backendVerdict, setBackendVerdict] = useState<any>(null);
@@ -73,6 +74,13 @@ export default function PlatformPage() {
       });
       
       const scenarioData = await createRes.json();
+      setCurrentScenarioId(String(scenarioData.id));
+
+      pendo.track("contract_review_initiated", {
+        scenarioId: String(scenarioData.id),
+        contractTitle: "Cordane Contract Review",
+        contractTextLength: 69,
+      });
 
       // 2. Trigger the AI Negotiation Graph
       const negotiateRes = await fetch(`${apiUrl}/api/negotiate`, {
@@ -96,8 +104,26 @@ export default function PlatformPage() {
         setVerdict(demoVerdict);
       }
 
+      const resolvedVerdict = negotiateData.verdict
+        ? (negotiateData.verdict.status === "APPROVED" ? "APPROVED" : negotiateData.verdict.status === "PENDING_HUMAN_REVIEW" ? "ESCALATED" : "REJECTED")
+        : demoVerdict;
+
+      pendo.track("negotiation_completed", {
+        scenarioId: String(scenarioData.id),
+        verdictStatus: resolvedVerdict,
+        transcriptLength: negotiateData.transcript?.length || 0,
+        actionRequired: negotiateData.verdict?.action_required || "",
+        agentCount: 4,
+        hadContestedStandard: !!negotiateData.verdict?.contested_standard,
+      });
+
     } catch (error) {
       console.error("Backend Error:", error);
+
+      pendo.track("negotiation_error", {
+        errorMessage: error instanceof Error ? error.message.substring(0, 200) : "Unknown error",
+      });
+
       // Removed hardcoded fallback; show actual error state
       setTranscript([
          { role: "SYSTEM", content: "CRITICAL FAILURE: Connection to the active AI Mesh backend failed. Ensure Render backend is running and NEXT_PUBLIC_API_URL is properly configured." }
@@ -328,12 +354,23 @@ export default function PlatformPage() {
                 {verdict === "ESCALATED" && (
                   <>
                     <Link href="/dashboard" className="w-full sm:w-auto">
-                      <button className="w-full px-8 py-4 bg-amber-500 text-black font-bold text-xs uppercase tracking-wider rounded-md hover:bg-amber-400 transition-colors shadow-lg shadow-amber-500/20">
+                      <button onClick={() => pendo.track("executive_override_approved", {
+                        scenarioId: currentScenarioId,
+                        verdictStatus: verdict,
+                        contestedStandard: backendVerdict?.contested_standard || "",
+                        vendorTarget: backendVerdict?.vendor_target || "",
+                        transcriptLength: transcript.length,
+                      })} className="w-full px-8 py-4 bg-amber-500 text-black font-bold text-xs uppercase tracking-wider rounded-md hover:bg-amber-400 transition-colors shadow-lg shadow-amber-500/20">
                         Approve Anyway
                       </button>
                     </Link>
                     <Link href="/dashboard" className="w-full sm:w-auto">
-                      <button className="w-full px-8 py-4 bg-transparent border border-foreground/10 text-foreground font-bold text-xs uppercase tracking-wider rounded-md hover:bg-foreground/5 transition-colors">
+                      <button onClick={() => pendo.track("contract_sent_for_revision", {
+                        scenarioId: currentScenarioId,
+                        verdictStatus: verdict,
+                        contestedStandard: backendVerdict?.contested_standard || "",
+                        vendorTarget: backendVerdict?.vendor_target || "",
+                      })} className="w-full px-8 py-4 bg-transparent border border-foreground/10 text-foreground font-bold text-xs uppercase tracking-wider rounded-md hover:bg-foreground/5 transition-colors">
                         Send for Revision
                       </button>
                     </Link>
