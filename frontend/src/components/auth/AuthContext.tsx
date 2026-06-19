@@ -42,6 +42,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 function PrivyAuthWrapper({ children }: { children: ReactNode }) {
   const privy = usePrivy();
+
+  const handleLogout = async () => {
+    pendo.clearSession();
+    await privy.logout();
+  };
+
   return (
     <UniversalAuthContext.Provider
       value={{
@@ -49,7 +55,7 @@ function PrivyAuthWrapper({ children }: { children: ReactNode }) {
         authenticated: privy.authenticated,
         user: privy.user,
         login: privy.login,
-        logout: privy.logout,
+        logout: handleLogout,
       }}
     >
       {children}
