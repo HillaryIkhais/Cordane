@@ -41,6 +41,24 @@ export default function VerdictsPage() {
     fetchVerdicts();
   }, []);
 
+  // Debounced search tracking
+  useEffect(() => {
+    if (!searchQuery) return;
+    const timer = setTimeout(() => {
+      pendo.track("verdicts_searched", {
+        searchQuery: searchQuery.substring(0, 100),
+        resultsCount: verdicts.filter((v) => {
+          const matchesFilter = filterStatus === "All" || (v.status || "").toUpperCase() === filterStatus.toUpperCase();
+          const s = searchQuery.toLowerCase();
+          return matchesFilter && ((v.contract || "").toLowerCase().includes(s) || (v.vendor || "").toLowerCase().includes(s) || (v.id || "").toLowerCase().includes(s));
+        }).length,
+        totalVerdicts: verdicts.length,
+        activeFilter: filterStatus,
+      });
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchQuery, filterStatus, verdicts]);
+
   const filteredVerdicts = verdicts.filter((v) => {
     const matchesFilter = filterStatus === "All" || (v.status || "").toUpperCase() === filterStatus.toUpperCase();
     const searchLower = searchQuery.toLowerCase();
@@ -81,7 +99,18 @@ export default function VerdictsPage() {
         {["All", "Approved", "Escalated", "Rejected"].map((status) => (
           <button 
             key={status}
-            onClick={() => setFilterStatus(status)}
+            onClick={() => {
+              setFilterStatus(status);
+              pendo.track("verdicts_filtered", {
+                filterStatus: status,
+                resultsCount: verdicts.filter((v) => {
+                  const matchesFilter = status === "All" || (v.status || "").toUpperCase() === status.toUpperCase();
+                  const s = searchQuery.toLowerCase();
+                  return matchesFilter && ((v.contract || "").toLowerCase().includes(s) || (v.vendor || "").toLowerCase().includes(s) || (v.id || "").toLowerCase().includes(s));
+                }).length,
+                totalVerdicts: verdicts.length,
+              });
+            }}
             className={`px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest shrink-0 transition-colors ${
               filterStatus === status 
                 ? 'bg-[#cc8b45] text-black shadow-[0_0_15px_rgba(204,139,69,0.3)]' 

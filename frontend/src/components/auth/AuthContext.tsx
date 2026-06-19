@@ -44,6 +44,9 @@ function PrivyAuthWrapper({ children }: { children: ReactNode }) {
   const privy = usePrivy();
 
   const handleLogout = async () => {
+    pendo.track("user_logged_out", {
+      logoutSource: "user_action",
+    });
     pendo.clearSession();
     await privy.logout();
   };

@@ -24,11 +24,24 @@ export default function SettingsPage() {
   const [isMeshSaved, setIsMeshSaved] = useState(false);
 
   const handleSaveProfile = () => {
+    pendo.track("profile_settings_saved", {
+      company: company,
+      role: role,
+      jurisdiction: jurisdiction,
+      notifyEscalated: notifyEscalated,
+      notifyApproved: notifyApproved,
+    });
     setIsProfileSaved(true);
     setTimeout(() => setIsProfileSaved(false), 2000);
   };
 
   const handleSaveMesh = () => {
+    pendo.track("mesh_configuration_saved", {
+      lglModel: lglModel,
+      finModel: finModel,
+      rskModel: rskModel,
+      opsModel: opsModel,
+    });
     setIsMeshSaved(true);
     setTimeout(() => setIsMeshSaved(false), 2000);
   };
